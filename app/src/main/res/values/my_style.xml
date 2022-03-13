@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="MyTextView" parent="Widget.AppCompat.TextView">
+        <item name="android:backgroundTint">#ACACAC</item>
+<!--        <item name="android:background">@drawable/title_shape</item>-->
+        <item name="android:layout_marginTop">3dp</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/black</item>
+
+    </style>
+
+    <style name="MyTextInputLayout" parent="Widget.Design.TextInputLayout">
+        <item name="android:layout_margin">10dp</item>
+        <item name="android:background">#D1CFCF</item>
+        <item name="android:textColorHint">#EA050D</item>
+    </style>
+
+    <style name="MyTextInputEditText" parent="Widget.Design.TextInputEditText">
+        <item name="android:padding">10dp</item>
+        <item name="android:text">salam</item>
+    </style>
+
+</resources>

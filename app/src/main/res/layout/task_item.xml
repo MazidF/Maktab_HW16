@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="com.example.hw16.model.Task"/>
+        <variable
+            name="task"
+            type="Task" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="5dp"
+        app:cardCornerRadius="24dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:scaleType="fitXY"
+                app:image='@{task.image_uri}'
+                app:isVisible='@{task.image_uri != null &amp;&amp; !task.image_uri.empty}'
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_launcher_background"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/MyTextView"
+                android:background="#ACACAC"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text='@{task.title, default="Doing signal home work"}'/>
+
+
+            <com.ms.square.android.expandabletextview.ExpandableTextView
+                android:id="@+id/expandable"
+                style="@style/MyTextView"
+                android:paddingBottom="10dp"
+                android:background="@drawable/description_shape"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:animDuration="100"
+                app:maxCollapsedLines="3"
+                app:setText='@{task.description}'>
+
+                <TextView
+                    android:id="@id/expandable_text"
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:ellipsize="end"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <ImageButton
+                    android:id="@id/expand_collapse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|bottom"
+                    android:background="@android:color/transparent"/>
+
+            </com.ms.square.android.expandabletextview.ExpandableTextView>
+
+
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+</layout>

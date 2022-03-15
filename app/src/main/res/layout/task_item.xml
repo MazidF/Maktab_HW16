@@ -4,34 +4,40 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <import type="com.example.hw16.model.Task"/>
+        <import type="com.example.hw16.model.TaskItemUiState"/>
         <variable
             name="task"
-            type="Task" />
+            type="TaskItemUiState" />
     </data>
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_margin="5dp"
-        app:cardCornerRadius="24dp">
+        android:padding="5dp"
+        app:cardCornerRadius="18dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/gray"
             android:orientation="vertical">
 
             <ImageView
+                android:adjustViewBounds="true"
+                android:maxHeight="120dp"
                 android:scaleType="fitXY"
                 app:image='@{task.image_uri}'
-                app:isVisible='@{task.image_uri != null &amp;&amp; !task.image_uri.empty}'
+                android:src="@drawable/loading_animation"
+                app:isVisible='@{task.image_uri != ""}'
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_launcher_background"/>
+                android:layout_height="wrap_content"/>
 
             <com.google.android.material.textview.MaterialTextView
                 style="@style/MyTextView"
-                android:background="#ACACAC"
+                android:maxLines="2"
+                android:textSize="22sp"
+                android:ellipsize="end"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text='@{task.title, default="Doing signal home work"}'/>
@@ -41,7 +47,6 @@
                 android:id="@+id/expandable"
                 style="@style/MyTextView"
                 android:paddingBottom="10dp"
-                android:background="@drawable/description_shape"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:animDuration="100"
@@ -49,9 +54,11 @@
                 app:setText='@{task.description}'>
 
                 <TextView
+                    android:paddingStart="3dp"
+                    android:paddingEnd="3dp"
                     android:id="@id/expandable_text"
-                    android:textColor="@color/white"
-                    android:textSize="24sp"
+                    android:textSize="19sp"
+                    android:textColor="#8C000000"
                     android:ellipsize="end"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
@@ -65,7 +72,20 @@
 
             </com.ms.square.android.expandabletextview.ExpandableTextView>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/black"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"/>
 
+            <TextView
+                style="@style/MyTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:text='@{task.deadline, default="2022/03/00   05:92"}'/>
 
         </LinearLayout>
 

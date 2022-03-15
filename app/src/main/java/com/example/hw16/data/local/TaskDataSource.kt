@@ -1,33 +1,34 @@
 package com.example.hw16.data.local
 
 import com.example.hw16.data.local.db.MyDao
+import com.example.hw16.data.local.db.TaskDao
 import com.example.hw16.model.Task
 
 class TaskDataSource(
-    private val taskDao: MyDao<Task, Long>
-) : LocalDataSource<Task, Long> {
+    private val taskDao: TaskDao
+) : LocalDataSource<Task, Long>(taskDao) {
 
-    override fun save(vararg item: Task, applyChanges: Boolean) {
-        if (applyChanges) {
-            taskDao.updateItem(*item)
-        } else {
-            taskDao.insertItem(*item)
-        }
+    fun getUserTasks(username: String): List<Task> {
+        return taskDao.getUserTasks(username)
     }
 
-    override fun load(): List<Task> {
-        return taskDao.getAll()
+    fun getTaskAfter() {
+
     }
 
-    override fun update(item: Task) {
-        taskDao.updateItem(item)
+    fun search(
+        title: String? = null,
+        description: String? = null,
+        deadline: Long? = null,
+        isDone: Boolean? = null,
+        imageUri: String? = null,
+        after: Long? = null,
+        before: String? = null,
+    ) : List<Task> {
+        return taskDao.filter(title, description, deadline, isDone, imageUri, after, before)
     }
 
-    override fun remove(vararg items: Task, removeAll: Boolean) {
-        if (removeAll) {
-            taskDao.deleteAll()
-        } else {
-            taskDao.deleteItem(*items)
-        }
+    fun removeWithId(vararg ids: Long) {
+        taskDao.deleteItem(*ids)
     }
 }

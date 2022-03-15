@@ -1,22 +1,25 @@
 package com.example.hw16.ui
 
+import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.fragment.app.commit
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.example.hw16.ui.home.FragmentHomeSub
 
-class MyFragmentPagerManager(manager: FragmentManager, private val fragments: List<Class<out Fragment>>)
-    : FragmentPagerAdapter(manager) {
+class MyFragmentPagerManager(
+    fragment: Fragment,
+    private val fragments: List<Class<out Fragment>>,
+    private val args: List<Bundle>,
+) : FragmentStateAdapter(fragment) {
+    private val manager = fragment.childFragmentManager
 
-    init {
-    }
+    override fun getItemCount() = fragments.size
 
-    override fun getCount() = fragments.size
-
-    override fun getItem(position: Int): Fragment {
-        return fragments[position].newInstance()
-    }
-
-    override fun getPageTitle(position: Int): CharSequence? {
-        return fragments[position].simpleName
+    override fun createFragment(position: Int): Fragment {
+        return fragments[position].newInstance().apply {
+            arguments = args[position]
+        }
     }
 }

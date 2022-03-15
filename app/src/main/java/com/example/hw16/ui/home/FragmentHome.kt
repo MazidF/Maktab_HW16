@@ -1,7 +1,66 @@
 package com.example.hw16.ui.home
 
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import com.example.hw16.R
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import com.example.hw16.databinding.FragmentHomeBinding
+import com.example.hw16.di.MyViewModelFactory
+import com.example.hw16.model.TaskState.*
+import com.example.hw16.ui.App
+import com.example.hw16.ui.MyFragmentPagerManager
+import com.example.hw16.ui.ViewModelMain
+import com.google.android.material.tabs.TabLayoutMediator
 
-class FragmentHome : Fragment(R.layout.fragment_home){
+class FragmentHome : Fragment() {
+    private val modelMain: ViewModelMain by activityViewModels(factoryProducer = {
+        MyViewModelFactory(App.serviceLocator)
+    })
+    private val model: ViewModelHome by activityViewModels(factoryProducer = {
+        MyViewModelFactory(App.serviceLocator)
+    })
+    lateinit var binding: FragmentHomeBinding
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentHomeBinding.inflate(layoutInflater, container, false)
+        return binding.root
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        with(model) {
+            getTasks(modelMain.user!!.username)
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        init()
+    }
+
+    private fun init() {
+        with(binding) {
+            initViewPager()
+        }
+    }
+
+    private fun FragmentHomeBinding.initViewPager() {
+        val labels = listOf("All", DONE.name, DOING.name, TODO.name)
+        homeViewPager.adapter = MyFragmentPagerManager(
+            this@FragmentHome,
+            List(4) { FragmentHomeSub::class.java },
+            labels.map { bundleOf("state" to it) },
+        )
+        TabLayoutMediator(homeTab, homeViewPager) { tab, position ->
+            tab.text = labels[position]
+        }.attach()
+    }
+
 }

@@ -1,13 +1,14 @@
 package com.example.hw16.ui.home
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import androidx.recyclerview.widget.RecyclerView
 import com.example.hw16.data.MyRepository
+import com.example.hw16.model.Task
 import com.example.hw16.model.TaskItemUiState
 import com.example.hw16.model.TaskState.*
 import com.example.hw16.utils.Mapper.toTaskItemUiState
+import com.example.hw16.utils.observeForever
+import kotlinx.coroutines.launch
 
 class ViewModelHome(
     private val repository: MyRepository
@@ -17,21 +18,24 @@ class ViewModelHome(
     val notifyState = MutableLiveData<NotifyDataChange>()
 
     init {
-        repository.taskChangeState.observeForever {
-            val (t, i) = it
+        repository.taskChangeState.observeForever { pair ->
+            if (pair == null) return@observeForever
+            val (liveData, i) = pair
             val position = array.indexOfFirst { task ->
                 task.id == i
             }
-            t?.let { task ->
-                if (position == -1) {
-                    addTask(task.toTaskItemUiState())
-                } else {
-                    array[position] = task.toTaskItemUiState()
+            observeForever(liveData) {
+                it?.let { task ->
+                    if (position == -1) {
+                        addTask(task.toTaskItemUiState())
+                    } else {
+                        array[position] = task.toTaskItemUiState()
+                    }
+                } ?: kotlin.run {
+                    array.removeAt(position)
+                    removeTask(it!!.toTaskItemUiState(), false)
                 }
-                return@observeForever
             }
-            array.removeAt(position)
-            removeTask(t!!.toTaskItemUiState(), false)
         }
     }
 
@@ -54,14 +58,16 @@ class ViewModelHome(
     fun getTasks(userName: String) {
         if (hasBeenLoaded) return
         hasBeenLoaded = true
-        val rawList = repository.getUserTasks(userName)
-        val list = rawList.map { task ->
-            task.toTaskItemUiState().also {
-                addTask(it, addToList = false, notify = false)
+        val liveData = repository.getUserTasks(userName).asLiveData()
+        observeForever(liveData) { rawList ->
+            val list = rawList.map { task ->
+                task.toTaskItemUiState().also {
+                    addTask(it, addToList = false, notify = false)
+                }
             }
+            array.addAll(list)
+            notifyState.value = NotifyDataChange.Notify()
         }
-        array.addAll(list)
-        notifyState.value = NotifyDataChange.Notify()
     }
 
     private fun addTask(task: TaskItemUiState, addToList: Boolean = true, notify: Boolean = true) {
@@ -96,7 +102,9 @@ class ViewModelHome(
 
     fun removeItems(vararg items: TaskItemUiState) {
         val listId = items.map { it.id }
-        repository.removeTask(*listId.toLongArray())
+        viewModelScope.launch {
+            repository.removeTask(*listId.toLongArray())
+        }
         for (item in items) {
             removeTask(item)
         }

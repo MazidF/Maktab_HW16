@@ -1,22 +1,23 @@
 package com.example.hw16.data.local
 
 import com.example.hw16.data.local.db.MyDao
+import kotlinx.coroutines.flow.Flow
 
 abstract class LocalDataSource<Item, PrimaryKey>(private val dao: MyDao<Item, PrimaryKey>) {
 
-    fun insert(vararg items: Item) : List<Long> {
+    suspend fun insert(vararg items: Item) : List<Long> {
         return dao.insertItem(*items)
     }
 
-    fun get(): List<Item> {
+    suspend fun get(): Flow<List<Item>> {
         return dao.getAll()
     }
 
-    fun update(vararg items: Item) {
+    suspend fun update(vararg items: Item) {
         dao.updateItem(*items)
     }
 
-    fun remove(vararg items: Item, removeAll: Boolean) {
+    suspend fun remove(vararg items: Item, removeAll: Boolean) {
         if (removeAll) {
             dao.deleteAll()
         } else {
@@ -24,7 +25,7 @@ abstract class LocalDataSource<Item, PrimaryKey>(private val dao: MyDao<Item, Pr
         }
     }
 
-    fun find(primaryKey: PrimaryKey): Item? {
+    suspend fun find(primaryKey: PrimaryKey): Flow<Item?> {
         return dao.find(primaryKey)
     }
 }

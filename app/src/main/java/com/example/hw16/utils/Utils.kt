@@ -2,9 +2,11 @@ package com.example.hw16.utils
 
 import android.app.DatePickerDialog
 import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
 import com.example.hw16.model.Task
 import com.example.hw16.model.TaskState
-import com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker
 import java.util.*
 import java.util.Calendar.*
 
@@ -66,4 +68,13 @@ fun Task.getTime(deadline: Long): String {
     return with(date) {
         "${year + 1900}/${month.format()}/${day.format()}  &  ${hours.format()}:${minutes.format()}"
     }
+}
+
+fun <T> ViewModel.observeForever(liveData: LiveData<T>, obs: Observer<T>) {
+    var observer: Observer<T>? = null
+    observer = Observer {
+        liveData.removeObserver(observer!!)
+        obs.onChanged(it)
+    }
+    liveData.observeForever(observer)
 }

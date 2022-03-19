@@ -1,25 +1,25 @@
 package com.example.hw16.data.local.db
 
 import androidx.room.*
-import androidx.sqlite.db.SimpleSQLiteQuery
+import kotlinx.coroutines.flow.Flow
 
 interface MyDao<Item, PrimaryKey> {
 
 /*    @RawQuery
     fun rawQuery(query: SimpleSQLiteQuery)*/
 
-    fun getAll() : List<Item>
+    suspend fun getAll() : Flow<List<Item>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertItem(vararg items: Item): List<Long>
+    suspend fun insertItem(vararg items: Item): List<Long>
 
     @Delete
-    fun deleteItem(vararg items: Item)
+    suspend fun deleteItem(vararg items: Item)
 
     @Update
-    fun updateItem(vararg item: Item)
+    suspend fun updateItem(vararg item: Item)
 
-    fun find(primaryKey: PrimaryKey): Item?
+    suspend fun find(primaryKey: PrimaryKey): Flow<Item?>
 
-    fun deleteAll()
+    suspend fun deleteAll()
 }

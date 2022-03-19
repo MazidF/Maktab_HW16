@@ -1,11 +1,13 @@
 package com.example.hw16.data
 
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
 import com.example.hw16.data.local.FileLocalDataSource
 import com.example.hw16.data.local.TaskDataSource
 import com.example.hw16.data.local.UserDataSource
 import com.example.hw16.model.Task
 import com.example.hw16.model.User
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.Serializable
 import java.util.concurrent.ExecutorService
@@ -17,77 +19,63 @@ class MyRepository(
     private val taskDataSource: TaskDataSource,
     private val fileDataSource: FileLocalDataSource
 ) {
-    val taskChangeState = MutableLiveData<Pair<Task?, Long>>()
+    val taskChangeState = MutableLiveData<Pair<LiveData<Task?>, Long>>()
 
     private fun <T> thread(todo: () -> T?): T? {
         val future: Future<T?> = executors.submit(todo)
         return future.get()
     }
 
-    fun removeTask(vararg ids: Long) {
-        thread {
-            taskDataSource.removeWithId(*ids)
-        }
+    suspend  fun removeTask(vararg ids: Long) {
+        taskDataSource.removeWithId(*ids)
     }
 
-    fun addTask(task: Task): Task {
-        return thread {
-            val id = taskDataSource.insert(task)[0]
-            getAndFind(id)
-        }!!
+    suspend  fun addTask(task: Task): Flow<Task?> {
+        val id = taskDataSource.insert(task)[0]
+        return getAndFind(id)
     }
 
-    private fun getAndFind(id: Long): Task? {
+    private suspend  fun getAndFind(id: Long): Flow<Task?> {
         return taskDataSource.find(id).also {
-            taskChangeState.postValue(Pair(it, id))
+            taskChangeState.postValue(Pair(it.asLiveData(), id))
         }
     }
 
-    fun searchTasks(
+    suspend  fun searchTasks(
         title: String? = null,
         description: String? = null,
         deadline: Long? = null,
         isDone: Boolean? = null,
         imageUri: String? = null,
-    ) : List<Task> {
-        return thread {
-            taskDataSource.search(title, description, deadline, isDone, imageUri)
-        }!!
+    ) : Flow<List<Task>> {
+        return taskDataSource.search(title, description, deadline, isDone, imageUri)
     }
 
-    fun getTask(id: Long): Task? {
-        return thread {
-            taskDataSource.find(id)
-        }
+    suspend  fun getTask(id: Long): Flow<Task?> {
+        return taskDataSource.find(id)
     }
 
-    fun getUserTasks(username: String): List<Task> {
-        return thread {
-            val result = taskDataSource.getUserTasks(username)
-            result
-        }!!
+    fun getUserTasks(username: String): Flow<List<Task>> {
+        return taskDataSource.getUserTasks(username)
     }
 
-    fun editTask(task: Task): Task {
-        return thread {
-            taskDataSource.update(task)
-            getAndFind(task.id!!)
-        }!!
+    suspend  fun editTask(task: Task): Flow<Task?> {
+        taskDataSource.update(task)
+        return getAndFind(task.id!!)
     }
 
-    fun signInUser(user: User): User {
-        return thread {
-            userDataSource.insert(user)
-            userDataSource.find(user.username)
-        }!!
+    suspend  fun signInUser(user: User): Flow<User?> {
+        userDataSource.insert(user)
+        return userDataSource.find(user.username)
     }
 
-    fun logInUser(userName: String, password: String): Pair<Boolean, User?> {
-        val user = thread { userDataSource.find(userName) }
-        return if (user != null && user.password == password) {
-            Pair(true, user)
-        } else {
-            Pair(false, null)
+    suspend  fun logInUser(userName: String, password: String): LiveData<Pair<Boolean, User?>> {
+        return userDataSource.find(userName).asLiveData().map { user ->
+            if (user == null) {
+                Pair(false, null)
+            } else {
+                Pair(password == user.password, user)
+            }
         }
     }
 

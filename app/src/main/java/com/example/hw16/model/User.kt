@@ -6,9 +6,9 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = User.TABLE_NAME)
 data class User(
-    @PrimaryKey @ColumnInfo(name = "user_id") val id: Long? = null,
     @ColumnInfo(name = "user_name") val username: String,
-    @ColumnInfo(name = "user_password") val password: String
+    @ColumnInfo(name = "user_password") val password: String,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "user_id") val id: Long = 0
 ) {
     companion object {
         const val TABLE_NAME = "user_table"
@@ -26,6 +26,6 @@ data class User(
     }
 
     override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
+        return id.hashCode()
     }
 }

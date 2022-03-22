@@ -12,9 +12,10 @@
     </style>
 
     <style name="MyTextInputLayout" parent="Widget.Design.TextInputLayout">
-        <item name="android:layout_margin">10dp</item>
-        <item name="android:background">#D1CFCF</item>
-        <item name="android:textColorHint">#EA050D</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:textColorHint">#000</item>
+        <item name="endIconMode">clear_text</item>
     </style>
 
     <style name="MyTextInputEditText" parent="Widget.Design.TextInputEditText">

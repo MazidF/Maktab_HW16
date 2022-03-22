@@ -3,12 +3,15 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/vcc/AndroidStudioProjects/HW16/app/src/main/res/drawable/circle.xml" value="0.104" />
         <entry key="..\:/Users/vcc/AndroidStudioProjects/HW16/app/src/main/res/drawable/description_shape.xml" value="0.204" />
         <entry key="..\:/Users/vcc/AndroidStudioProjects/HW16/app/src/main/res/drawable/loading_img.xml" value="0.1" />
         <entry key="..\:/Users/vcc/AndroidStudioProjects/HW16/app/src/main/res/drawable/my_shapes.xml" value="0.204" />
         <entry key="..\:/Users/vcc/AndroidStudioProjects/HW16/app/src/main/res/layout/activity_main.xml" value="0.4" />
         <entry key="..\:/Users/vcc/AndroidStudioProjects/HW16/app/src/main/res/layout/fragment_home.xml" value="0.264" />
         <entry key="..\:/Users/vcc/AndroidStudioProjects/HW16/app/src/main/res/layout/fragment_home_sub.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/vcc/AndroidStudioProjects/HW16/app/src/main/res/layout/fragment_login.xml" value="0.42397914856646396" />
+        <entry key="..\:/Users/vcc/AndroidStudioProjects/HW16/app/src/main/res/layout/fragment_sign_in.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/vcc/AndroidStudioProjects/HW16/app/src/main/res/layout/header_layout.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/vcc/AndroidStudioProjects/HW16/app/src/main/res/layout/singin.xml" value="0.24048913043478262" />
         <entry key="..\:/Users/vcc/AndroidStudioProjects/HW16/app/src/main/res/layout/snackbar_one_btn.xml" value="0.25" />

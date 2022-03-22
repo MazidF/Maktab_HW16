@@ -1,17 +1,18 @@
 package com.example.hw16.data
 
+import android.content.Context
 import androidx.lifecycle.*
 import com.example.hw16.data.local.FileLocalDataSource
+import com.example.hw16.data.local.FileType
 import com.example.hw16.data.local.TaskDataSource
 import com.example.hw16.data.local.UserDataSource
 import com.example.hw16.model.Task
 import com.example.hw16.model.User
+import com.example.hw16.utils.observeForever
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import java.io.File
 import java.io.Serializable
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Future
 
 class MyRepository(
     private val executors: ExecutorService,
@@ -19,39 +20,34 @@ class MyRepository(
     private val taskDataSource: TaskDataSource,
     private val fileDataSource: FileLocalDataSource
 ) {
-    val taskChangeState = MutableLiveData<Pair<LiveData<Task?>, Long>>()
+    val taskChangeState = MutableLiveData<Boolean>()
+    val userChangeState = MutableLiveData<User>()
 
-    private fun <T> thread(todo: () -> T?): T? {
-        val future: Future<T?> = executors.submit(todo)
-        return future.get()
+    private val userUpdateObserver = Observer<User?> {
+        userChangeState.postValue(it)
     }
 
-    suspend  fun removeTask(vararg ids: Long) {
+    suspend fun removeTask(vararg ids: Long) {
         taskDataSource.removeWithId(*ids)
+        taskChangeState.postValue(true)
     }
 
-    suspend  fun addTask(task: Task): Flow<Task?> {
-        val id = taskDataSource.insert(task)[0]
-        return getAndFind(id)
+    suspend fun addTask(task: Task) {
+        taskDataSource.insert(task)[0]
+        taskChangeState.postValue(true)
     }
 
-    private suspend  fun getAndFind(id: Long): Flow<Task?> {
-        return taskDataSource.find(id).also {
-            taskChangeState.postValue(Pair(it.asLiveData(), id))
-        }
-    }
-
-    suspend  fun searchTasks(
+    fun searchTasks(
         title: String? = null,
         description: String? = null,
         deadline: Long? = null,
         isDone: Boolean? = null,
         imageUri: String? = null,
-    ) : Flow<List<Task>> {
+    ): Flow<List<Task>> {
         return taskDataSource.search(title, description, deadline, isDone, imageUri)
     }
 
-    suspend  fun getTask(id: Long): Flow<Task?> {
+    fun getTask(id: Long): Flow<Task?> {
         return taskDataSource.find(id)
     }
 
@@ -59,18 +55,22 @@ class MyRepository(
         return taskDataSource.getUserTasks(username)
     }
 
-    suspend  fun editTask(task: Task): Flow<Task?> {
+    suspend fun editTask(task: Task) {
         taskDataSource.update(task)
-        return getAndFind(task.id!!)
+        taskChangeState.postValue(true)
     }
 
-    suspend  fun signInUser(user: User): Flow<User?> {
+    suspend fun signInUser(user: User): LiveData<User?> {
         userDataSource.insert(user)
-        return userDataSource.find(user.username)
+        return userDataSource.find(user.username).asLiveData().also { liveData ->
+            observeForever(liveData, userUpdateObserver)
+        }
     }
 
-    suspend  fun logInUser(userName: String, password: String): LiveData<Pair<Boolean, User?>> {
-        return userDataSource.find(userName).asLiveData().map { user ->
+    fun logInUser(userName: String, password: String): LiveData<Pair<Boolean, User?>> {
+        return userDataSource.find(userName).asLiveData().also { liveData ->
+            observeForever(liveData, userUpdateObserver)
+            }.map { user ->
             if (user == null) {
                 Pair(false, null)
             } else {
@@ -79,28 +79,36 @@ class MyRepository(
         }
     }
 
-    //////////////////////// save to file //////////////////////
+    //////////////////////// file //////////////////////
+
+    fun getRootPath(
+        context: Context,
+        fileType: FileType
+    ) = fileDataSource.getRoot(context, fileType).absolutePath
+
+    fun getFilePath(
+        context: Context,
+        fileType: FileType,
+        fileName: String
+    ) = fileDataSource.getFile(context, fileType, fileName)?.absolutePath
 
     fun save(
-        file: File, byteArray: ByteArray, override: Boolean = false,
+        context: Context,
+        fileType: FileType,
+        fileName: String,
+        byteArray: ByteArray,
+        override: Boolean = false,
         waitUntilFileIsReady: Boolean = false
+    ) : String? {
+        return fileDataSource.save(context, fileType, fileName, byteArray, override, waitUntilFileIsReady)
+    }
+
+    fun load(
+        context: Context,
+        fileType: FileType,
+        fileName: String
     ) {
-        fileDataSource.save(file, byteArray, override, waitUntilFileIsReady)
-    }
-
-    fun save(
-        uri: String, byteArray: ByteArray, override: Boolean = false,
-        waitUntilFileIsReady: Boolean = false
-    ) {
-        save(File(uri), byteArray, override, waitUntilFileIsReady)
-    }
-
-    fun load(file: File) {
-        fileDataSource.load(file)
-    }
-
-    fun load(uri: String) {
-        load(File(uri))
+        fileDataSource.load(context, fileType, fileName)
     }
 
     fun <T : Serializable> saveObject(file: File, t: T) {
@@ -109,5 +117,9 @@ class MyRepository(
 
     fun <T : Serializable> saveObject(file: File): T? {
         return fileDataSource.readObject(file)
+    }
+
+    fun removeFile(uri: String) {
+        fileDataSource.deleteFile(uri)
     }
 }

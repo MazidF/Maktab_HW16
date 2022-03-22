@@ -12,11 +12,11 @@ class UserDataSource(
     private val userDao: UserDao
 ) : LocalDataSource<User, String>(userDao) {
 
-    suspend fun getUserWithTasks(): Flow<List<UserWithTasks>> {
+    fun getUserWithTasks(): Flow<List<UserWithTasks>> {
         return userDao.getUserWithTasks()
     }
 
-    suspend fun filter(
+    fun filter(
         name: String? = null,
         password: String? = null,
     ) : Flow<List<User>> {

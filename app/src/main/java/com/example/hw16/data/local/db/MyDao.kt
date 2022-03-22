@@ -8,7 +8,7 @@ interface MyDao<Item, PrimaryKey> {
 /*    @RawQuery
     fun rawQuery(query: SimpleSQLiteQuery)*/
 
-    suspend fun getAll() : Flow<List<Item>>
+    fun getAll() : Flow<List<Item>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertItem(vararg items: Item): List<Long>
@@ -19,7 +19,7 @@ interface MyDao<Item, PrimaryKey> {
     @Update
     suspend fun updateItem(vararg item: Item)
 
-    suspend fun find(primaryKey: PrimaryKey): Flow<Item?>
+    fun find(primaryKey: PrimaryKey): Flow<Item?>
 
     suspend fun deleteAll()
 }

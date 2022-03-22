@@ -2,9 +2,17 @@ package com.example.hw16.utils
 
 import android.app.DatePickerDialog
 import android.content.Context
+import android.graphics.Bitmap
+import android.net.Uri
+import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavDirections
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.FragmentNavigator
 import com.example.hw16.model.Task
 import com.example.hw16.model.TaskState
 import java.util.*
@@ -70,11 +78,38 @@ fun Task.getTime(deadline: Long): String {
     }
 }
 
-fun <T> ViewModel.observeForever(liveData: LiveData<T>, obs: Observer<T>) {
+fun <T> observeForever(liveData: LiveData<T>, obs: Observer<T>) {
     var observer: Observer<T>? = null
     observer = Observer {
-        liveData.removeObserver(observer!!)
         obs.onChanged(it)
+        liveData.removeObserver(observer!!)
     }
     liveData.observeForever(observer)
+}
+
+fun ActivityResultCaller.createImageLauncher(
+    camera: (Bitmap?) -> Unit,
+    gallery: (Uri?) -> Unit
+): Pair<ActivityResultLauncher<Void>, ActivityResultLauncher<String>> {
+    val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) {
+        camera(it)
+    }
+    val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) {
+        gallery(it)
+    }
+    return Pair(cameraLauncher, galleryLauncher)
+}
+
+fun NavController.popUpToNavigate(
+    dest: Int,
+    inclusive: Boolean,
+    destination: NavDirections
+) {
+    val navOption = NavOptions.Builder()
+        .setPopUpTo(dest, inclusive)
+        .build()
+    navigate(
+        destination,
+        navOptions = navOption
+    )
 }

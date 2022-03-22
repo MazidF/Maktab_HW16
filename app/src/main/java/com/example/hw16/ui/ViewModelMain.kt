@@ -2,13 +2,16 @@ package com.example.hw16.ui
 
 import android.content.Context
 import android.graphics.Bitmap
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.example.hw16.data.MyRepository
+import com.example.hw16.data.local.FileType
 import com.example.hw16.model.Task
 import com.example.hw16.model.User
 import com.example.hw16.utils.createDatePicker
 import com.example.hw16.utils.createTimePicker
 import com.example.hw16.utils.isToday
+import com.example.hw16.utils.observeForever
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.File
 
@@ -17,12 +20,16 @@ class ViewModelMain(
 ) : ViewModel() {
 
     companion object {
-        const val IMAGE_FILE = "images"
-        const val VOICE_FILE = "voice"
+        const val SUCCESS = "success"
+        const val SIGN_IN_FAILED = "signInFailed"
+        const val LOGIN_FAILED = "loginFailed"
+        const val WRONG_PASS = "wrongPassword"
     }
-
-    var user: User? = User(0, "mock user", "mock password")
-    private set
+    val error by lazy {
+        MutableLiveData<String>()
+    }
+    private val _user = MutableLiveData<User>(null)
+    val user: LiveData<User> = _user
 
     fun createPicker(context: Context, cb: (Int, Int, Int, Int, Int) -> Unit) {
         createDatePicker(context) { year, month, day ->
@@ -33,31 +40,48 @@ class ViewModelMain(
     }
 
     fun addTask(task: Task) {
-        repository.addTask(task)
+        viewModelScope.launch {
+            repository.addTask(task)
+        }
     }
 
-    fun login(userName: String, password: String): Boolean {
-        val(has, user) = repository.logInUser(userName, password)
-        this.user = user
-        return has
+    fun login(userName: String, password: String) {
+        val liveData = repository.logInUser(userName, password)
+        observeForever(liveData) {
+            if (it.first) {
+                it.second?.let { user ->
+                    _user.value = user
+                    error.value = SUCCESS
+                    return@observeForever
+                }
+            }
+            error.value = LOGIN_FAILED
+        }
     }
 
     fun signIn(user: User) {
-        repository.signInUser(user)
-        this.user = user
+        viewModelScope.launch {
+            observeForever(repository.signInUser(user)) {
+                if (it != null) {
+                    _user.value = it
+                    error.value = SUCCESS
+                } else {
+                    error.value = SIGN_IN_FAILED
+                }
+            }
+        }
     }
 
-    fun saveToFile(bitmap: Bitmap, filesDir: File): String? {
+    fun saveToFile(context: Context, fileType: FileType, bitmap: Bitmap): String? {
         val output = ByteArrayOutputStream()
         if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, output)) {
             return null
         }
-        val root = File(filesDir, IMAGE_FILE)
-        if (root.exists().not()) {
-            root.mkdirs()
-        }
-        val file = File(root, System.currentTimeMillis().toString() + ".png")
-        repository.save(file, output.toByteArray(), waitUntilFileIsReady = true)
-        return file.absolutePath
+        val fileName = System.currentTimeMillis().toString()
+        return repository.save(context, fileType, fileName, output.toByteArray(), waitUntilFileIsReady = true)
+    }
+
+    fun removeFile(uri: String) {
+        repository.removeFile(uri)
     }
 }

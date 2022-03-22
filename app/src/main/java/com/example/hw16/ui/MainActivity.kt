@@ -9,15 +9,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import androidx.navigation.NavOptions
+import androidx.navigation.findNavController
 import com.example.hw16.R
+import com.example.hw16.data.local.FileType
 import com.example.hw16.databinding.ActivityMainBinding
 import com.example.hw16.databinding.TaskMakerBinding
 import com.example.hw16.di.MyViewModelFactory
 import com.example.hw16.model.Task
+import com.example.hw16.ui.home.FragmentHomeDirections
 import com.example.hw16.utils.*
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
+    private val navController by lazy {
+        findNavController(R.id.container)
+    }
     private lateinit var dialog: AlertDialog
     private lateinit var imageDialog: AlertDialog
     private lateinit var cameraLauncher: ActivityResultLauncher<Void>
@@ -31,11 +39,21 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        init()
+        init(savedInstanceState == null)
     }
 
-    private fun init() {
+    private fun init(creating: Boolean) {
         with(binding) {
+            model.user.observe(this@MainActivity) {
+                if (it == null && creating) {
+                    val navOption = NavOptions.Builder()
+                        .setPopUpTo(R.id.fragmentHome, true)
+                        .build()
+                    navController.navigate(FragmentHomeDirections.actionFragmentHomeToFragmentLogin()
+                        , navOptions = navOption)
+                }
+                bottom.isVisible = (it != null)
+            }
             bottom.background = null
             initTaskDialog()
             initImageTakerDialog()
@@ -59,7 +77,7 @@ class MainActivity : AppCompatActivity() {
     private fun createCameraLauncher(binding: TaskMakerBinding) {
         cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) {
             if (it != null) {
-                binding.uri = model.saveToFile(it, filesDir)
+                binding.uri = model.saveToFile(this, FileType.IMAGE_FILE, it) ?: ""
             }
         }
         galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) {
@@ -89,10 +107,11 @@ class MainActivity : AppCompatActivity() {
             }
             taskMakerImageRetry.setOnClickListener {
                 imageDialog.show()
-                File(uri).delete()
+                model.removeFile(uri!!)
             }
             taskMakerImageRemover.setOnClickListener {
                 taskMakerImageView.setImageResource(R.drawable.ic_camera)
+                model.removeFile(uri!!)
                 uri = ""
             }
         }
@@ -114,7 +133,7 @@ class MainActivity : AppCompatActivity() {
                     taskMakerDate.apply {
                             text = getText(R.string.time_data)
                             error = null
-                        }
+                    }
                     taskMakerTitle.requestFocus()
                     taskMakerImageView.setImageResource(R.drawable.ic_camera)
                     uri = ""
@@ -130,11 +149,13 @@ class MainActivity : AppCompatActivity() {
             with(binding) {
                 dialog.dismiss()
                 task = Task(
-                    userName = model.user!!.username,
+                    userName = model.user.value!!.username,
                     title = taskMakerTitle.text.toString(),
                     description = taskMakerDescription.text.toString(),
                     deadline = taskMakerDate.tag as Long, // TODO: Time should be right :(
-                    image_uri = uri ?: ""
+                    image_uri = uri?.run {
+                        substring(lastIndexOf("/") + 1)
+                    } ?: ""
                 )
             }
         }

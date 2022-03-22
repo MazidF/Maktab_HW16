@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable name="uri"
+            type="String"/>
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="20dp"
+                    android:gravity="center"
+                    android:text="Sign In"
+                    android:textSize="24sp"
+                    android:textStyle="bold"/>
+
+                <ImageView
+                    android:id="@+id/signIn_image_picker"
+                    android:layout_gravity="center"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    app:isVisible='@{uri == null}'
+                    android:src="@drawable/ic_camera" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    app:isVisible='@{uri != null}'
+                    app:image='@{uri}'
+                    android:id="@+id/signIn_image_view"
+                    android:layout_gravity="center"
+                    android:layout_width="250dp"
+                    android:layout_height="175dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_camera" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    app:endIconMode="clear_text"
+                    app:startIconDrawable="@drawable/ic_user"
+                    android:id="@+id/signIn_username_layout"
+                    android:layout_margin="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="username">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/signIn_username"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    app:endIconMode="clear_text"
+                    android:id="@+id/signIn_pass_layout"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:startIconDrawable="@drawable/ic_lock"
+                    android:hint="password">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:inputType="textPassword"
+                        android:id="@+id/signIn_pass"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    app:endIconMode="clear_text"
+                    android:id="@+id/signIn_repass_layout"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:startIconDrawable="@drawable/ic_lock"
+                    android:hint="retry password">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:inputType="textPassword"
+                        android:id="@+id/signIn_repass"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/signIn_btn"
+                    android:layout_marginTop="30dp"
+                    app:cornerRadius="16dp"
+                    android:padding="3dp"
+                    android:text="Sign In"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:backgroundTint="#777777"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/signIn_login"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginStart="15dp"
+                    android:text="have already an account?"/>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/signIn_image_remover"
+            app:isVisible='@{uri != null}'
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fabSize="mini"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/ic_delete"
+            app:layout_anchor="@id/signIn_image_view"
+            app:layout_anchorGravity="center|left" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/signIn_image_retry"
+            app:isVisible='@{uri != null}'
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fabSize="mini"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/ic_retry"
+            app:layout_anchor="@id/signIn_image_view"
+            app:layout_anchorGravity="center|right" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>

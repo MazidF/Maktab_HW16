@@ -5,13 +5,13 @@ import com.example.hw16.model.TaskItemUiState
 
 object Mapper {
 
-    fun Task.toTaskItemUiState(): TaskItemUiState {
+    fun Task.toTaskItemUiState(prefix: String = ""): TaskItemUiState {
         return TaskItemUiState(
             title = title,
             description = description,
             deadline = getTime(deadline),
-            image_uri = image_uri,
-            id = id ?: throw Exception("Task Doesn't have ID!!!"),
+            image_uri = prefix + image_uri,
+            id = id,
             state = getState(isDone, deadline)
         )
     }

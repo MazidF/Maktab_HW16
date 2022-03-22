@@ -1,32 +1,71 @@
 package com.example.hw16.data.local
 
+import android.content.Context
 import java.io.File
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
-import java.lang.Exception
 
 class FileLocalDataSource {
 
-    fun save(uri: String, bytes: ByteArray, override: Boolean = false) : Boolean {
-        val file = File(uri)
-        return save(file, bytes, override)
+    fun getRoot(context: Context, fileType: FileType): File {
+        return File(context.filesDir, fileType.value)
     }
 
-    fun save(destinationFile: File, bytes: ByteArray,
-             override: Boolean = false, waitUntilFileIsReady: Boolean = false) : Boolean {
+    fun getFile(
+        context: Context,
+        fileType: FileType,
+        fileName: String
+    ): File? {
+        val root = getRoot(context, fileType)
+        if (root.exists()) {
+            return File(root, fileName)
+        }
+        return null
+    }
+
+    fun deleteFile(
+        uri: String
+    ): Boolean {
+        val file = File(uri)
+        if (file.exists()) {
+            return file.delete()
+        }
+        return false
+    }
+
+    fun save(
+        context: Context,
+        fileType: FileType,
+        fileName: String,
+        bytes: ByteArray,
+        override: Boolean = false, waitUntilFileIsReady: Boolean = false
+    ): String? {
+        val root = getRoot(context, fileType)
+        if (root.exists().not()) {
+            root.mkdirs()
+        }
+        return save(File(root, fileName), bytes, override, waitUntilFileIsReady)
+    }
+
+    private fun save(
+        destinationFile: File,
+        bytes: ByteArray,
+        override: Boolean = false,
+        waitUntilFileIsReady: Boolean = false
+    ): String? {
         if (destinationFile.exists()) {
             if (override.not()) {
-                return false
+                return null
             } else {
                 var succssed = destinationFile.delete()
                 succssed = succssed and destinationFile.createNewFile()
                 if (succssed.not()) {
-                    return false
+                    return null
                 }
             }
         } else if (destinationFile.createNewFile().not()) {
-            return false
+            return null
         }
         try {
             destinationFile.outputStream().use {
@@ -34,20 +73,27 @@ class FileLocalDataSource {
                 it.flush()
             }
             if (waitUntilFileIsReady) {
-                while (destinationFile.canRead().not()) {}
+                while (destinationFile.canRead().not()) { }
             }
         } catch (e: Exception) {
-            return false
+            return null
         }
-        return true
+        return destinationFile.absolutePath
     }
 
-    fun load(uri: String) : ByteArray? {
-        val file = File(uri)
-        return load(file)
+    fun load(
+        context: Context,
+        fileType: FileType,
+        fileName: String,
+    ): ByteArray? {
+        val root = getRoot(context, fileType)
+        if (root.exists()) {
+            return load(File(root, fileName))
+        }
+        return null
     }
 
-    fun load(file: File): ByteArray? {
+    private fun load(file: File): ByteArray? {
         if (file.exists().not()) {
             return null
         }
@@ -60,7 +106,7 @@ class FileLocalDataSource {
         }
     }
 
-    fun <T : Serializable> writeObject(file: File, t: T) : Boolean {
+    fun <T : Serializable> writeObject(file: File, t: T): Boolean {
         return try {
             ObjectOutputStream(file.outputStream()).use {
                 it.writeUnshared(t)
@@ -72,7 +118,7 @@ class FileLocalDataSource {
         }
     }
 
-    fun <T : Serializable> readObject(file: File) : T? {
+    fun <T : Serializable> readObject(file: File): T? {
         return try {
             ObjectInputStream(file.inputStream()).use {
                 it.readUnshared() as T
@@ -82,3 +128,4 @@ class FileLocalDataSource {
         }
     }
 }
+

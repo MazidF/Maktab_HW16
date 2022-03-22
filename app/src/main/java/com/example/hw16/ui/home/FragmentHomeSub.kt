@@ -22,7 +22,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class FragmentHomeSub : Fragment() {
-    private lateinit var adapter: TaskAdapter
+    private lateinit var adapter: TaskListAdapter
     val model: ViewModelHome by activityViewModels(factoryProducer = {
         MyViewModelFactory(App.serviceLocator)
     })
@@ -39,33 +39,22 @@ class FragmentHomeSub : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("FragmentHomeSub", requireArguments()["state"].toString() + " view created")
         init()
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private fun init() {
         initDialog()
-        val list = getIndexList()
 
-        adapter = TaskAdapter(list) { binding, item ->
-            // TODO: onClick
-        }
+        adapter = TaskListAdapter()
 
         model.notifyState.observe(viewLifecycleOwner) {
             if (it == null) return@observe
-            when (it) {
-                is NotifyDataChange.Delete -> {
-                    adapter.notifyItemRangeInserted(it.position, it.size)
-                }
-                is NotifyDataChange.Insert -> {
-                    adapter.notifyItemRangeRemoved(it.position, it.size)
-                }
-                is NotifyDataChange.Notify -> {
-                    adapter.notifyDataSetChanged()
-                }
-            }
+            adapter.submitList(getList())
             model.notifyState.value = null
         }
+
         with(binding) {
             recyclerView.apply {
                 setRecycledViewPool(model.viewPool)
@@ -88,7 +77,7 @@ class FragmentHomeSub : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun onSwipeItem(position: Int) {
-        val item = adapter.list[position]
+        val item = adapter.currentList[position]
         adapter.remove(position)
 
         val view = SnackbarOneBtnBinding.inflate(layoutInflater).apply {
@@ -112,7 +101,7 @@ class FragmentHomeSub : Fragment() {
 
     }
 
-    private fun getIndexList(): ArrayList<TaskItemUiState> {
+    private fun getList(): ArrayList<TaskItemUiState> {
         val args = requireArguments()
         return when (args["state"]) {
             DONE.name -> model.listDone

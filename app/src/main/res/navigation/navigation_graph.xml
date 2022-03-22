@@ -3,18 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/navigation_graph"
     app:startDestination="@id/fragmentHome">
-
     <fragment
         android:id="@+id/fragmentHome"
         android:name="com.example.hw16.ui.home.FragmentHome"
-        android:label="FragmentHome" />
+        android:label="FragmentHome" >
+        <action
+            android:id="@+id/action_fragmentHome_to_fragmentLogin"
+            app:destination="@id/fragmentLogin" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentLogin"
+        android:name="com.example.hw16.ui.login.FragmentLogin"
+        android:label="FragmentLogin" >
+        <action
+            android:id="@+id/action_fragmentLogin_to_fragmentSignIn"
+            app:destination="@id/fragmentSignIn" />
+        <action
+            android:id="@+id/action_fragmentLogin_to_fragmentHome"
+            app:destination="@id/fragmentHome" />
+    </fragment>
     <fragment
         android:id="@+id/fragmentSignIn"
         android:name="com.example.hw16.ui.signin.FragmentSignIn"
         android:label="FragmentSignIn" >
         <action
             android:id="@+id/action_fragmentSignIn_to_fragmentHome"
-            app:destination="@id/fragmentHome"
-            app:popUpToInclusive="true" />
+            app:destination="@id/fragmentHome" />
     </fragment>
 </navigation>

@@ -9,7 +9,7 @@ abstract class LocalDataSource<Item, PrimaryKey>(private val dao: MyDao<Item, Pr
         return dao.insertItem(*items)
     }
 
-    suspend fun get(): Flow<List<Item>> {
+    fun get(): Flow<List<Item>> {
         return dao.getAll()
     }
 
@@ -25,7 +25,7 @@ abstract class LocalDataSource<Item, PrimaryKey>(private val dao: MyDao<Item, Pr
         }
     }
 
-    suspend fun find(primaryKey: PrimaryKey): Flow<Item?> {
+    fun find(primaryKey: PrimaryKey): Flow<Item?> {
         return dao.find(primaryKey)
     }
 }

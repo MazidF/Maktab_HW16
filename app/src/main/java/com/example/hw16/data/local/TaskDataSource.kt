@@ -17,7 +17,7 @@ class TaskDataSource(
 
     }
 
-    suspend fun search(
+    fun search(
         title: String? = null,
         description: String? = null,
         deadline: Long? = null,

@@ -14,19 +14,19 @@ interface UserDao : MyDao<User, String> {
     override suspend fun deleteAll()
 
     @Query("select * from user_table where user_name = :primaryKey")
-    override suspend fun find(primaryKey: String) : Flow<User?>
+    override fun find(primaryKey: String) : Flow<User?>
 
     @Query("select * from user_table")
-    override suspend fun getAll() : Flow<List<User>>
+    override fun getAll() : Flow<List<User>>
 
     @Query("select * from user_table")
-    suspend fun getUserWithTasks() : Flow<List<UserWithTasks>>
+    fun getUserWithTasks() : Flow<List<UserWithTasks>>
 
     @Query("select * from user_table " +
             "where user_name = :name " +
             "and user_password = :password " +
             "and 1"
-    ) suspend fun filter(
+    ) fun filter(
         name: String? = null,
         password: String? = null,
     ) : Flow<List<User>>

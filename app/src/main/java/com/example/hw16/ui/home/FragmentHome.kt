@@ -36,7 +36,7 @@ class FragmentHome : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         with(model) {
-            getTasks(modelMain.user!!.username)
+            getTasks(requireContext())
         }
     }
 

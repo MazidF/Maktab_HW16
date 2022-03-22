@@ -12,10 +12,10 @@ interface TaskDao : MyDao<Task, Long> {
     override suspend fun deleteAll()
 
     @Query("select * from task_table where task_id = :primaryKey")
-    override suspend fun find(primaryKey: Long): Flow<Task?>
+    override fun find(primaryKey: Long): Flow<Task?>
 
     @Query("select * from task_table order by task_deadline asc")
-    override suspend fun getAll(): Flow<List<Task>>
+    override fun getAll(): Flow<List<Task>>
 
     @Query("select * from task_table where user_owner_id = :username")
     fun getUserTasks(username: String) : Flow<List<Task>>
@@ -29,7 +29,7 @@ interface TaskDao : MyDao<Task, Long> {
             "and task_deadline > :after " +
             "and task_deadline < :before " +
             "and 1"
-    ) suspend fun filter(
+    ) fun filter(
         title: String? = null,
         description: String? = null,
         deadline: Long? = null,

@@ -1,39 +1,40 @@
 package com.example.hw16.ui.home
 
+import android.content.Context
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.RecyclerView
 import com.example.hw16.data.MyRepository
+import com.example.hw16.data.local.FileType
 import com.example.hw16.model.Task
 import com.example.hw16.model.TaskItemUiState
 import com.example.hw16.model.TaskState.*
+import com.example.hw16.model.User
 import com.example.hw16.utils.Mapper.toTaskItemUiState
 import com.example.hw16.utils.observeForever
 import kotlinx.coroutines.launch
+import java.io.File
 
 class ViewModelHome(
     private val repository: MyRepository
 ) : ViewModel() {
+    private var user: User? = null
     private var hasBeenLoaded = false
+    private lateinit var rootImage: String
     val viewPool = RecyclerView.RecycledViewPool()
     val notifyState = MutableLiveData<NotifyDataChange>()
 
     init {
-        repository.taskChangeState.observeForever { pair ->
-            if (pair == null) return@observeForever
-            val (liveData, i) = pair
-            val position = array.indexOfFirst { task ->
-                task.id == i
+        with(repository) {
+            userChangeState.observeForever {
+                if (it != null) {
+                    this@ViewModelHome.user = it
+                } else {
+                    resetLists()
+                }
             }
-            observeForever(liveData) {
-                it?.let { task ->
-                    if (position == -1) {
-                        addTask(task.toTaskItemUiState())
-                    } else {
-                        array[position] = task.toTaskItemUiState()
-                    }
-                } ?: kotlin.run {
-                    array.removeAt(position)
-                    removeTask(it!!.toTaskItemUiState(), false)
+            taskChangeState.observeForever {
+                if (it == true) {
+                    updateTasks()
                 }
             }
         }
@@ -55,13 +56,38 @@ class ViewModelHome(
         ArrayList<TaskItemUiState>(5)
     }
 
-    fun getTasks(userName: String) {
+    private fun updateTasks() {
+        resetLists(false)
+        user?.let {
+            loadTasks(userName = it.username, root = rootImage)
+        }
+    }
+
+    private fun resetLists(notify: Boolean = true) {
+        listDone.clear()
+        listDoing.clear()
+        listTodo.clear()
+        taskList.value!!.clear()
+        hasBeenLoaded = false
+        if (notify) {
+            notifyState.postValue(NotifyDataChange.Notify())
+        }
+    }
+
+    fun getTasks(context: Context) {
+        user?.let {
+            loadTasks(context, it.username)
+        }
+    }
+
+    private fun loadTasks(context: Context? = null, userName: String, root: String? = null) {
         if (hasBeenLoaded) return
         hasBeenLoaded = true
+        rootImage = context?.run { repository.getRootPath(this, FileType.IMAGE_FILE) } ?: root!!
         val liveData = repository.getUserTasks(userName).asLiveData()
         observeForever(liveData) { rawList ->
             val list = rawList.map { task ->
-                task.toTaskItemUiState().also {
+                task.toTaskItemUiState(rootImage + File.separator).also {
                     addTask(it, addToList = false, notify = false)
                 }
             }

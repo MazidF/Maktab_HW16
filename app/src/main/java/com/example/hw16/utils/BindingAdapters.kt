@@ -19,7 +19,6 @@ import com.ms.square.android.expandabletextview.ExpandableTextView
 @BindingAdapter("app:image")
 fun setImageFromUri(imageView: ImageView, uri: String?) {
     if (uri != null && uri != "") {
-        Log.d("uri_testing", "[$uri]")
         Glide.with(imageView.context)
             .load(uri)
             .placeholder(R.drawable.loading_animation)
@@ -30,7 +29,6 @@ fun setImageFromUri(imageView: ImageView, uri: String?) {
                     target: Target<Drawable>?,
                     isFirstResource: Boolean
                 ): Boolean {
-                    Log.d("uri_testing", "failed: [$uri]")
                     imageView.visibility = GONE
                     return true
                 }

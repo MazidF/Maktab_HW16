@@ -5,6 +5,9 @@
     <data>
         <variable name="uri"
             type="String"/>
+        <variable
+            name="hasError"
+            type="Boolean" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -49,6 +52,20 @@
                     android:layout_height="175dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_camera" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    app:isVisible='@{hasError == true}'
+                    android:padding="3dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginEnd="25dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/circle"
+                    android:textColor="#FFFFFF"
+                    android:text="Username exists!!"
+                    android:gravity="center"
+                    android:backgroundTint="#F00" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     app:endIconMode="clear_text"

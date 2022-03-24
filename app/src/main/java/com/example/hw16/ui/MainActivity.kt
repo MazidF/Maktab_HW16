@@ -1,28 +1,34 @@
 package com.example.hw16.ui
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
-import android.os.UserHandle
+import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import com.example.hw16.R
 import com.example.hw16.data.local.FileType
 import com.example.hw16.databinding.ActivityMainBinding
+import com.example.hw16.databinding.HeaderLayoutBinding
 import com.example.hw16.databinding.TaskMakerBinding
 import com.example.hw16.di.MyViewModelFactory
 import com.example.hw16.model.Task
 import com.example.hw16.ui.home.FragmentHomeDirections
-import com.example.hw16.utils.*
-import java.io.File
+import com.example.hw16.utils.format
+import com.example.hw16.utils.logger
+import com.example.hw16.utils.toSecond
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        const val USERNAME = "username"
+        const val PASSWORD = "password"
+    }
+
     private val navController by lazy {
         findNavController(R.id.container)
     }
@@ -39,20 +45,34 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        init(savedInstanceState == null)
+        init()
     }
 
-    private fun init(creating: Boolean) {
+    private fun init() {
+        actionBarInit()
         with(binding) {
+            user = model.user
+            lifecycleOwner = this@MainActivity
+            navigationView.addHeaderView(headerInit())
+            val userPair = load()
+            if (userPair != null) {
+                val (username, password) = userPair
+                model.login(username, password)
+            } else {
+                navigateToLogin()
+            }
             model.user.observe(this@MainActivity) {
-                if (it == null && creating) {
-                    val navOption = NavOptions.Builder()
-                        .setPopUpTo(R.id.fragmentHome, true)
-                        .build()
-                    navController.navigate(FragmentHomeDirections.actionFragmentHomeToFragmentLogin()
-                        , navOptions = navOption)
+                if (it == null) {
+                    navigateToLogin()
                 }
-                bottom.isVisible = (it != null)
+                supportActionBar?.setDisplayHomeAsUpEnabled(it != null)
+            }
+            navigationView.menu.apply {
+                getItem(0).setOnMenuItemClickListener {
+                    onBackPressed()
+                    model.logout()
+                    false
+                }
             }
             bottom.background = null
             initTaskDialog()
@@ -61,6 +81,51 @@ class MainActivity : AppCompatActivity() {
                 dialog.show()
             }
         }
+    }
+
+    private fun navigateToLogin() {
+        val navOption = NavOptions.Builder()
+            .setPopUpTo(R.id.fragmentHome, true)
+            .build()
+        navController.navigate(
+            FragmentHomeDirections.actionFragmentHomeToFragmentLogin(), navOptions = navOption
+        )
+    }
+
+    private fun actionBarInit() {
+        supportActionBar?.apply {
+            title = "Task Manager"
+            setDisplayHomeAsUpEnabled(true)
+            setHomeAsUpIndicator(R.drawable.ic_menu)
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        with(binding.drawer) {
+            if (isOpen) {
+                close()
+            } else {
+                open()
+            }
+        }
+        return true
+    }
+
+    override fun onBackPressed() {
+        if (binding.drawer.isOpen) {
+            binding.drawer.close()
+            return
+        }
+        super.onBackPressed()
+    }
+
+    private fun headerInit(): View {
+        val binding = HeaderLayoutBinding.inflate(layoutInflater)
+        binding.apply {
+            user = model.user
+            lifecycleOwner = this@MainActivity
+        }
+        return binding.root
     }
 
     private fun initImageTakerDialog() {
@@ -77,7 +142,7 @@ class MainActivity : AppCompatActivity() {
     private fun createCameraLauncher(binding: TaskMakerBinding) {
         cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) {
             if (it != null) {
-                binding.uri = model.saveToFile(this, FileType.IMAGE_FILE, it) ?: ""
+                binding.uri = model.saveImageToFile(this, FileType.IMAGE_FILE, it) ?: ""
             }
         }
         galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) {
@@ -93,7 +158,8 @@ class MainActivity : AppCompatActivity() {
             uri = ""
             taskMakerCalendar.setOnClickListener {
                 model.createPicker(this@MainActivity) { year, month, day, hour, minute ->
-                    taskMakerDate.text = "$year/${month.format()}/${day.format()}  &  ${hour.format()}:${minute.format()}"
+                    taskMakerDate.text =
+                        "$year/${month.format()}/${day.format()}  &  ${hour.format()}:${minute.format()}"
                     taskMakerDate.tag = toSecond(year, month, day, hour, minute)
                 }
             }
@@ -131,8 +197,8 @@ class MainActivity : AppCompatActivity() {
                         error = null
                     }
                     taskMakerDate.apply {
-                            text = getText(R.string.time_data)
-                            error = null
+                        text = getText(R.string.time_data)
+                        error = null
                     }
                     taskMakerTitle.requestFocus()
                     taskMakerImageView.setImageResource(R.drawable.ic_camera)
@@ -162,7 +228,7 @@ class MainActivity : AppCompatActivity() {
         return task
     }
 
-    private fun check(binding: TaskMakerBinding) : Boolean {
+    private fun check(binding: TaskMakerBinding): Boolean {
         var result = true
 
         with(binding) {
@@ -183,5 +249,37 @@ class MainActivity : AppCompatActivity() {
         }
 
         return result
+    }
+
+    private fun save() {
+        logger("save")
+        val sharedPreferences = getSharedPreferences(packageName, MODE_PRIVATE)
+        val edit = sharedPreferences.edit()
+        edit.apply {
+            clear()
+            model.user.value?.let {
+                logger("user exist!!")
+                putString(USERNAME, it.username)
+                putString(PASSWORD, it.password)
+            }
+        }
+        edit.apply()
+    }
+
+    private fun load() : Pair<String, String>? {
+        logger("load")
+        var result: Pair<String, String>? = null
+        val sharedPreferences = getSharedPreferences(packageName, MODE_PRIVATE)
+        sharedPreferences.run {
+            val username = getString(USERNAME, null) ?: return@run
+            val password = getString(PASSWORD, null) ?: throw Exception("pass is lost!!")
+            result = Pair(username, password)
+        }
+        return result
+    }
+
+    override fun onStop() {
+        super.onStop()
+        save()
     }
 }

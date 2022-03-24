@@ -9,13 +9,14 @@ import com.example.hw16.data.local.UserDataSource
 import com.example.hw16.model.Task
 import com.example.hw16.model.User
 import com.example.hw16.utils.observeForever
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import java.io.File
 import java.io.Serializable
+import java.lang.Exception
 import java.util.concurrent.ExecutorService
 
 class MyRepository(
-    private val executors: ExecutorService,
     private val userDataSource: UserDataSource,
     private val taskDataSource: TaskDataSource,
     private val fileDataSource: FileLocalDataSource
@@ -61,9 +62,13 @@ class MyRepository(
     }
 
     suspend fun signInUser(user: User): LiveData<User?> {
-        userDataSource.insert(user)
-        return userDataSource.find(user.username).asLiveData().also { liveData ->
-            observeForever(liveData, userUpdateObserver)
+        return try {
+            userDataSource.insert(user)
+            userDataSource.find(user.username).asLiveData().also { liveData ->
+                observeForever(liveData, userUpdateObserver)
+            }
+        } catch (e: Exception) {
+            MutableLiveData(null)
         }
     }
 

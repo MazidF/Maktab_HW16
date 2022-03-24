@@ -85,9 +85,12 @@ class ViewModelHome(
         hasBeenLoaded = true
         rootImage = context?.run { repository.getRootPath(this, FileType.IMAGE_FILE) } ?: root!!
         val liveData = repository.getUserTasks(userName).asLiveData()
+        val rootPath = rootImage + File.separator
         observeForever(liveData) { rawList ->
+            var prefix: String
             val list = rawList.map { task ->
-                task.toTaskItemUiState(rootImage + File.separator).also {
+                prefix = if(task.image_uri == "") "" else rootPath
+                task.toTaskItemUiState(prefix).also {
                     addTask(it, addToList = false, notify = false)
                 }
             }

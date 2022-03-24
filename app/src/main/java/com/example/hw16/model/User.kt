@@ -2,12 +2,14 @@ package com.example.hw16.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = User.TABLE_NAME)
+@Entity(tableName = User.TABLE_NAME, indices = [Index("user_name", unique = true)])
 data class User(
     @ColumnInfo(name = "user_name") val username: String,
     @ColumnInfo(name = "user_password") val password: String,
+    @ColumnInfo(name = "user_image_uri") val imageUri: String = "",
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "user_id") val id: Long = 0
 ) {
     companion object {

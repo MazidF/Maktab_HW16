@@ -10,11 +10,10 @@ import java.util.concurrent.Executors
 
 class MyServiceLocator(context: Context) {
     private val database = MyDatabase.getDatabase(context)
-    private val executors = Executors.newFixedThreadPool(3)
     private val userDao = database.getUserDao()
     private val userDataSource = UserDataSource(userDao)
     private val taskDao = database.getTaskDao()
     private val taskDataSource = TaskDataSource(taskDao)
     private val fileDatabase = FileLocalDataSource()
-    val repository = MyRepository(executors, userDataSource, taskDataSource, fileDatabase)
+    val repository = MyRepository(userDataSource, taskDataSource, fileDatabase)
 }

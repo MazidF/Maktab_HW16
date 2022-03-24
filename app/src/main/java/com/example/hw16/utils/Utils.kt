@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -112,4 +113,8 @@ fun NavController.popUpToNavigate(
         destination,
         navOptions = navOption
     )
+}
+
+fun logger(msg: String) {
+    Log.d("app_log", msg)
 }

@@ -12,8 +12,8 @@ import com.example.hw16.R
 import com.example.hw16.databinding.FragmentLoginBinding
 import com.example.hw16.di.MyViewModelFactory
 import com.example.hw16.ui.App
+import com.example.hw16.ui.ProgressResult.*
 import com.example.hw16.ui.ViewModelMain
-import com.example.hw16.ui.ViewModelMain.Companion.SUCCESS
 import com.example.hw16.utils.popUpToNavigate
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -42,6 +42,7 @@ class FragmentLogin : Fragment() {
             with(model) {
                 error.observe(viewLifecycleOwner) {
                     if (it == null) return@observe
+                    error.value = null
                     if (it == SUCCESS) {
                         navController.popUpToNavigate(
                             R.id.fragmentLogin,
@@ -74,7 +75,7 @@ class FragmentLogin : Fragment() {
         fun innerCheck(layout: TextInputLayout, editText: TextInputEditText) {
             layout.helperText = if (editText.text!!.isBlank()) {
                 result = false
-                "*Invalid!!"
+                "*Required!!"
             } else {
                 null
             }

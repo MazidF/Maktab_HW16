@@ -13,7 +13,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.example.hw16.R
 import com.example.hw16.data.local.FileType
@@ -21,8 +20,10 @@ import com.example.hw16.databinding.FragmentSignInBinding
 import com.example.hw16.di.MyViewModelFactory
 import com.example.hw16.model.User
 import com.example.hw16.ui.App
+import com.example.hw16.ui.ProgressResult.SUCCESS
 import com.example.hw16.ui.ViewModelMain
 import com.example.hw16.utils.createImageLauncher
+import com.example.hw16.utils.popUpToNavigate
 
 class FragmentSignIn : Fragment() {
     private lateinit var imageDialog: AlertDialog
@@ -48,16 +49,30 @@ class FragmentSignIn : Fragment() {
 
     private fun init() {
         dialogInit()
+        with(model) {
+            error.observe(viewLifecycleOwner) {
+                if (it == null) return@observe
+                error.value = null
+                if (it == SUCCESS) {
+                    navController.popUpToNavigate(
+                        R.id.fragmentLogin,
+                        true,
+                        FragmentSignInDirections.actionFragmentSignInToFragmentHome()
+                    )
+                }
+                binding.hasError = it != SUCCESS
+            }
+        }
         with(binding) {
             signInBtn.setOnClickListener {
                 if (check()) {
-                    model.signIn(User(signInUsername.text.toString(), signInPass.text.toString()))
-                    val navOption = NavOptions.Builder()
-                        .setPopUpTo(R.id.fragmentLogin, true)
-                        .build()
-                    navController.navigate(
-                        FragmentSignInDirections.actionFragmentSignInToFragmentHome(),
-                        navOptions = navOption
+                    val uri = this.uri
+                    model.signIn(
+                        User(
+                            signInUsername.text.toString(),
+                            signInPass.text.toString(),
+                            uri ?: ""
+                        )
                     )
                 }
             }
@@ -144,7 +159,7 @@ class FragmentSignIn : Fragment() {
         super.onAttach(context)
         val (camera, gallery) = createImageLauncher({ bitmap ->
             if (bitmap != null) {
-                binding.uri = model.saveToFile(requireContext(), FileType.IMAGE_FILE, bitmap)
+                binding.uri = model.saveImageToFile(requireContext(), FileType.IMAGE_FILE, bitmap)
             }
         }) {
             if (it != null) {

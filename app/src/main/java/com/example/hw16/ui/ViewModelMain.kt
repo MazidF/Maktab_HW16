@@ -13,23 +13,17 @@ import com.example.hw16.utils.isToday
 import com.example.hw16.utils.observeForever
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
-import java.io.File
+import com.example.hw16.ui.ProgressResult.*
 
 class ViewModelMain(
     private val repository: MyRepository
 ) : ViewModel() {
 
-    companion object {
-        const val SUCCESS = "success"
-        const val SIGN_IN_FAILED = "signInFailed"
-        const val LOGIN_FAILED = "loginFailed"
-        const val WRONG_PASS = "wrongPassword"
-    }
     val error by lazy {
-        MutableLiveData<String>()
+        MutableLiveData<ProgressResult>()
     }
-    private val _user = MutableLiveData<User>(null)
-    val user: LiveData<User> = _user
+    private val _user = MutableLiveData<User?>()
+    val user: LiveData<User?> = _user
 
     fun createPicker(context: Context, cb: (Int, Int, Int, Int, Int) -> Unit) {
         createDatePicker(context) { year, month, day ->
@@ -55,8 +49,12 @@ class ViewModelMain(
                     return@observeForever
                 }
             }
-            error.value = LOGIN_FAILED
+            error.value = FAIL
         }
+    }
+
+    fun logout() {
+        _user.value = null
     }
 
     fun signIn(user: User) {
@@ -66,13 +64,13 @@ class ViewModelMain(
                     _user.value = it
                     error.value = SUCCESS
                 } else {
-                    error.value = SIGN_IN_FAILED
+                    error.value = FAIL
                 }
             }
         }
     }
 
-    fun saveToFile(context: Context, fileType: FileType, bitmap: Bitmap): String? {
+    fun saveImageToFile(context: Context, fileType: FileType, bitmap: Bitmap): String? {
         val output = ByteArrayOutputStream()
         if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, output)) {
             return null

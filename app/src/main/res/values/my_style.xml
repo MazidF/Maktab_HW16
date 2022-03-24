@@ -23,4 +23,8 @@
         <item name="android:text">salam</item>
     </style>
 
+    <style name="circleStyle" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
+
 </resources>

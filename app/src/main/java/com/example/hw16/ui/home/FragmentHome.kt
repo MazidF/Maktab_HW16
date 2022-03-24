@@ -1,6 +1,7 @@
 package com.example.hw16.ui.home
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import com.example.hw16.model.TaskState.*
 import com.example.hw16.ui.App
 import com.example.hw16.ui.MyFragmentPagerManager
 import com.example.hw16.ui.ViewModelMain
+import com.example.hw16.utils.logger
 import com.google.android.material.tabs.TabLayoutMediator
 
 class FragmentHome : Fragment() {
@@ -35,6 +37,7 @@ class FragmentHome : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        logger("onCreate FragmentHome")
         with(model) {
             getTasks(requireContext())
         }
@@ -42,6 +45,7 @@ class FragmentHome : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        logger("onViewCreate FragmentHome")
         init()
     }
 
@@ -63,4 +67,8 @@ class FragmentHome : Fragment() {
         }.attach()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        logger("onDestroy FragmentHome")
+    }
 }

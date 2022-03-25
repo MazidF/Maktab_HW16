@@ -30,7 +30,7 @@
                 android:scaleType="fitXY"
                 app:image='@{task.image_uri}'
                 android:src="@drawable/loading_animation"
-                app:isVisible='@{task.image_uri != ""}'
+                app:isVisible='@{task.image_uri != null}'
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 

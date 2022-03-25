@@ -1,14 +1,12 @@
 package com.example.hw16.ui.home
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import com.example.hw16.databinding.FragmentHomeBinding
 import com.example.hw16.di.MyViewModelFactory
 import com.example.hw16.model.TaskState.*
@@ -38,9 +36,6 @@ class FragmentHome : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         logger("onCreate FragmentHome")
-        with(model) {
-            getTasks(requireContext())
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -50,6 +45,13 @@ class FragmentHome : Fragment() {
     }
 
     private fun init() {
+        modelMain.user.observe(viewLifecycleOwner) {
+            if (it == null) return@observe
+            with(model) {
+                model.user = it
+                getTasks(requireContext())
+            }
+        }
         with(binding) {
             initViewPager()
         }

@@ -19,13 +19,13 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
 class FragmentLogin : Fragment() {
-    private val navController by lazy {
-        findNavController()
-    }
     private val model: ViewModelMain by activityViewModels(factoryProducer = {
         MyViewModelFactory(App.serviceLocator)
     })
     lateinit var binding: FragmentLoginBinding
+    private val navController by lazy {
+        findNavController()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

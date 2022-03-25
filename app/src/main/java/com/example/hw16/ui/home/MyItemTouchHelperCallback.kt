@@ -5,7 +5,6 @@ import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.RecyclerView
 
 class MyItemTouchHelperCallback(
-    /*private val adapter: TaskAdapter,*/
     val onDrag: (Int, Int) -> Boolean = { _, _ -> false },
     val onSwipe: (Int) -> Unit = {}
 ) : ItemTouchHelper.SimpleCallback(UP or DOWN or RIGHT or LEFT, LEFT) {
@@ -17,16 +16,11 @@ class MyItemTouchHelperCallback(
         val from = viewHolder.adapterPosition
         val to = target.adapterPosition
         return onDrag(from, to)
-//        Collections.swap(adapter.list, from, to)
-//        adapter.notifyItemMoved(from, to)
-//        return true
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         val position = viewHolder.adapterPosition
         onSwipe(position)
-//        adapter.list.removeAt(position)
-//        adapter.notifyItemRemoved(position)
     }
 
     companion object {

@@ -8,7 +8,7 @@ data class Task(
     @ColumnInfo(name = "task_title") val title: String,
     @ColumnInfo(name = "task_description") val description: String,
     @ColumnInfo(name = "task_deadline") val deadline: Long,
-    @ColumnInfo(name = "task_image_uri") val image_uri: String = "",
+    @ColumnInfo(name = "task_image_uri") val image_uri: String? = null,
     @ColumnInfo(name = "task_is_done") val isDone: Boolean = false,
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "task_id") val id: Long = 0
 ) {

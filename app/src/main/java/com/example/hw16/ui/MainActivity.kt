@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
             val userPair = load()
             if (userPair != null) {
                 val (username, password) = userPair
-                model.login(username, password)
+                model.login(username, password, false)
             } else {
                 navigateToLogin()
             }
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             }
             navigationView.menu.apply {
                 getItem(0).setOnMenuItemClickListener {
-                    onBackPressed()
+                    drawer.close()
                     model.logout()
                     false
                 }

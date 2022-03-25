@@ -17,7 +17,7 @@ import java.io.File
 class ViewModelHome(
     private val repository: MyRepository
 ) : ViewModel() {
-    private var user: User? = null
+    var user: User? = null
     private var hasBeenLoaded = false
     private lateinit var rootImage: String
     val viewPool = RecyclerView.RecycledViewPool()
@@ -25,18 +25,18 @@ class ViewModelHome(
 
     init {
         with(repository) {
-            userChangeState.observeForever {
-                if (it != null) {
-                    this@ViewModelHome.user = it
-                } else {
-                    resetLists()
-                }
-            }
-            taskChangeState.observeForever {
-                if (it == true) {
-                    updateTasks()
-                }
-            }
+//            userChangeState.observeForever {
+//                if (it != null) {
+//                    this@ViewModelHome.user = it
+//                } else {
+//                    resetLists()
+//                }
+//            }
+//            taskChangeState.observeForever {
+//                if (it == true) {
+//                    updateTasks()
+//                }
+//            }
         }
     }
 

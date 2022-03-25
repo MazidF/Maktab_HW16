@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL
 import com.example.hw16.databinding.FragmentHomeSubBinding
@@ -18,14 +19,13 @@ import com.example.hw16.model.TaskState.*
 import com.example.hw16.ui.App
 import com.example.hw16.ui.home.MyItemTouchHelperCallback.Companion.connect
 import com.google.android.material.snackbar.Snackbar
-import java.util.*
 import kotlin.collections.ArrayList
 
 class FragmentHomeSub : Fragment() {
-    private lateinit var adapter: TaskListAdapter
     val model: ViewModelHome by activityViewModels(factoryProducer = {
         MyViewModelFactory(App.serviceLocator)
     })
+    private lateinit var adapter: TaskListAdapter
     lateinit var binding: FragmentHomeSubBinding
 
     override fun onCreateView(
@@ -43,7 +43,6 @@ class FragmentHomeSub : Fragment() {
         init()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun init() {
         initDialog()
 
@@ -63,21 +62,20 @@ class FragmentHomeSub : Fragment() {
                     onDrag = this@FragmentHomeSub::onDragItem,
                     onSwipe = this@FragmentHomeSub::onSwipeItem
                 )
-                layoutManager = StaggeredGridLayoutManager(2, VERTICAL).apply {
-                    gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS
-                }
+                layoutManager = LinearLayoutManager(requireContext())
             }
         }
     }
 
     private fun onDragItem(from: Int, to: Int): Boolean {
-        adapter.swap(from, to)
-        return true
+//        adapter.swap(from, to)
+//        return true
+        return false
     }
 
     @SuppressLint("SetTextI18n")
     private fun onSwipeItem(position: Int) {
-        val item = adapter.currentList[position]
+/*        val item = adapter.currentList[position]
         adapter.remove(position)
 
         val view = SnackbarOneBtnBinding.inflate(layoutInflater).apply {
@@ -94,7 +92,7 @@ class FragmentHomeSub : Fragment() {
             setAction("dismiss") {
                 model.removeItems(item)
             }
-        }.show()
+        }.show()*/
     }
 
     private fun initDialog() {

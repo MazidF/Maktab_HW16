@@ -2,18 +2,22 @@ package com.example.hw16.ui
 
 import android.content.Context
 import android.graphics.Bitmap
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.hw16.data.MyRepository
 import com.example.hw16.data.local.FileType
 import com.example.hw16.model.Task
 import com.example.hw16.model.User
+import com.example.hw16.ui.ProgressResult.FAIL
+import com.example.hw16.ui.ProgressResult.SUCCESS
 import com.example.hw16.utils.createDatePicker
 import com.example.hw16.utils.createTimePicker
 import com.example.hw16.utils.isToday
 import com.example.hw16.utils.observeForever
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
-import com.example.hw16.ui.ProgressResult.*
 
 class ViewModelMain(
     private val repository: MyRepository
@@ -39,31 +43,37 @@ class ViewModelMain(
         }
     }
 
-    fun login(userName: String, password: String) {
+    fun logout() {
+        _user.value = null
+    }
+
+    fun login(userName: String, password: String, setError: Boolean = true) {
         val liveData = repository.logInUser(userName, password)
         observeForever(liveData) {
             if (it.first) {
                 it.second?.let { user ->
                     _user.value = user
-                    error.value = SUCCESS
+                    if (setError) {
+                        error.value = SUCCESS
+                    }
                     return@observeForever
                 }
             }
-            error.value = FAIL
+            if (setError) {
+                error.value = FAIL
+            }
         }
     }
 
-    fun logout() {
-        _user.value = null
-    }
-
-    fun signIn(user: User) {
+    fun signIn(user: User, setError: Boolean = true) {
         viewModelScope.launch {
             observeForever(repository.signInUser(user)) {
                 if (it != null) {
                     _user.value = it
-                    error.value = SUCCESS
-                } else {
+                    if (setError) {
+                        error.value = SUCCESS
+                    }
+                } else if (setError) {
                     error.value = FAIL
                 }
             }
@@ -76,7 +86,13 @@ class ViewModelMain(
             return null
         }
         val fileName = System.currentTimeMillis().toString()
-        return repository.save(context, fileType, fileName, output.toByteArray(), waitUntilFileIsReady = true)
+        return repository.save(
+            context,
+            fileType,
+            fileName,
+            output.toByteArray(),
+            waitUntilFileIsReady = true
+        )
     }
 
     fun removeFile(uri: String) {

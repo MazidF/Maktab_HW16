@@ -21,21 +21,13 @@ class MyRepository(
     private val taskDataSource: TaskDataSource,
     private val fileDataSource: FileLocalDataSource
 ) {
-    val taskChangeState = MutableLiveData<Boolean>()
-    val userChangeState = MutableLiveData<User>()
-
-    private val userUpdateObserver = Observer<User?> {
-        userChangeState.postValue(it)
-    }
 
     suspend fun removeTask(vararg ids: Long) {
         taskDataSource.removeWithId(*ids)
-        taskChangeState.postValue(true)
     }
 
-    suspend fun addTask(task: Task) {
-        taskDataSource.insert(task)[0]
-        taskChangeState.postValue(true)
+    suspend fun addTask(task: Task): Long {
+        return taskDataSource.insert(task)[0]
     }
 
     fun searchTasks(
@@ -58,24 +50,19 @@ class MyRepository(
 
     suspend fun editTask(task: Task) {
         taskDataSource.update(task)
-        taskChangeState.postValue(true)
     }
 
     suspend fun signInUser(user: User): LiveData<User?> {
         return try {
             userDataSource.insert(user)
-            userDataSource.find(user.username).asLiveData().also { liveData ->
-                observeForever(liveData, userUpdateObserver)
-            }
+            userDataSource.find(user.username).asLiveData()
         } catch (e: Exception) {
             MutableLiveData(null)
         }
     }
 
     fun logInUser(userName: String, password: String): LiveData<Pair<Boolean, User?>> {
-        return userDataSource.find(userName).asLiveData().also { liveData ->
-            observeForever(liveData, userUpdateObserver)
-            }.map { user ->
+        return userDataSource.find(userName).asLiveData().map { user ->
             if (user == null) {
                 Pair(false, null)
             } else {

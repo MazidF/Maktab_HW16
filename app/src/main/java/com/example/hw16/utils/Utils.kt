@@ -13,8 +13,8 @@ import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
-import androidx.navigation.fragment.FragmentNavigator
 import com.example.hw16.model.Task
+import com.example.hw16.model.TaskItemUiState
 import com.example.hw16.model.TaskState
 import java.util.*
 import java.util.Calendar.*
@@ -77,6 +77,10 @@ fun Task.getTime(deadline: Long): String {
     return with(date) {
         "${year + 1900}/${month.format()}/${day.format()}  &  ${hours.format()}:${minutes.format()}"
     }
+}
+
+fun TaskItemUiState.getDeadline(time: String): Long {
+    Tempo.now
 }
 
 fun <T> observeForever(liveData: LiveData<T>, obs: Observer<T>) {

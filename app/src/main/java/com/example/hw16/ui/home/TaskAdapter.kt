@@ -69,8 +69,9 @@ class TaskHolder(
     }
 }
 
-class TaskListAdapter(private val onClick: (TaskItemUiState) -> Unit = {}) :
+class TaskListAdapter(private val indexList: List<Int>? = null, private val onClick: (TaskItemUiState) -> Unit = {}) :
     ListAdapter<TaskItemUiState, TaskHolder>(DIFF_CALLBACK) {
+
     companion object {
         val DIFF_CALLBACK = object : DiffUtil.ItemCallback<TaskItemUiState>() {
             override fun areItemsTheSame(
@@ -103,21 +104,6 @@ class TaskListAdapter(private val onClick: (TaskItemUiState) -> Unit = {}) :
     }
 
     override fun onBindViewHolder(holder: TaskHolder, position: Int) {
-        holder.bind(getItem(position))
-    }
-
-    fun add(item: TaskItemUiState, position: Int) {
-        currentList.add(position, item)
-        notifyItemInserted(position)
-    }
-
-    fun remove(position: Int) {
-        currentList.removeAt(position)
-        notifyItemRemoved(position)
-    }
-
-    fun swap(from: Int, to: Int) {
-        Collections.swap(currentList, from, to)
-        notifyItemMoved(from, to)
+        holder.bind(getItem(indexList?.get(position) ?: position))
     }
 }

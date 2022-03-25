@@ -18,7 +18,7 @@ import com.ms.square.android.expandabletextview.ExpandableTextView
 
 @BindingAdapter("app:image")
 fun setImageFromUri(imageView: ImageView, uri: String?) {
-    if (uri != null && uri != "") {
+    if (uri != null) {
         Glide.with(imageView.context)
             .load(uri)
             .placeholder(R.drawable.loading_animation)

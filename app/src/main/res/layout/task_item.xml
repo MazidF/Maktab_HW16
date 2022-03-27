@@ -86,7 +86,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:textSize="16sp"
-                android:text='@{task.deadline, default="2022/03/00   05:92"}'/>
+                android:text='@{task.getTime(), default="2022/03/00   05:92"}'/>
 
         </LinearLayout>
 

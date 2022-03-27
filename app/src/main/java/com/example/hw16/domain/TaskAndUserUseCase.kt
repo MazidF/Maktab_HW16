@@ -13,6 +13,7 @@ import com.example.hw16.model.TaskState
 import com.example.hw16.model.User
 import com.example.hw16.ui.ProgressResult
 import com.example.hw16.utils.Mapper.toTaskItemUiState
+import com.example.hw16.utils.logger
 import com.example.hw16.utils.observeForever
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -23,9 +24,6 @@ class TaskAndUserUseCase(
 ) {
     private val _user = MutableLiveData<User?>()
     val user: LiveData<User?> = _user
-
-    private val _taskListChangeState = MutableLiveData<Boolean>()
-    val taskListChangeState: LiveData<Boolean> = _taskListChangeState
 
     fun logout() {
         _user.value = null
@@ -48,6 +46,7 @@ class TaskAndUserUseCase(
     }
 
     suspend fun signIn(user: User): LiveData<ProgressResult> {
+        logger("sign_in")
         val result = MutableLiveData<ProgressResult>()
         observeForever(repository.signInUser(user)) {
             if (it != null) {
@@ -81,7 +80,7 @@ class TaskAndUserUseCase(
 
     //////////////////////////////////////////////////////////
 
-    private val taskList = ArrayList<TaskItemUiState>()
+    private var taskList = ArrayList<TaskItemUiState>()
     private val _tasks = MutableLiveData<List<TaskItemUiState>>()
     val tasks: LiveData<List<TaskItemUiState>> = _tasks
 
@@ -97,30 +96,35 @@ class TaskAndUserUseCase(
         ArrayList<Int>(5)
     }
 
-    fun getTasks() {
-        val liveData = repository.getUserTasks(user.value!!.username).asLiveData()
-        val rootPath = rootFile.absolutePath + File.separator
+    fun getTasks(fileType: FileType = FileType.IMAGE_FILE) {
+        val user = user.value ?: run {
+            logger("user was null so end getTasks")
+            return
+        }
+        val liveData = repository.getUserTasks(user.username).asLiveData()
+        val rootPath = rootFile.absolutePath + File.separator + fileType.value + File.separator
         observeForever(liveData) { list ->
             val resultList = list.mapIndexed { index, task ->
-                task.toTaskItemUiState(task.image_uri?.let { rootPath + it }).also { taskItemUiState ->
-                    separate(taskItemUiState, index)
-                }
+                task.toTaskItemUiState(if (task.image_uri == "") "" else rootPath + task.image_uri)
+                    .also { taskItemUiState ->
+                        separate(taskItemUiState, index)
+                    }
             }
-            taskList.addAll(resultList)
+            taskList = ArrayList(resultList)
+            clearLists()
+//            taskList.addAll(resultList)
             _tasks.value = taskList
-            _taskListChangeState.value = true
         }
     }
 
     private fun clearLists() {
-        taskList.clear()
         listDone.clear()
         listDoing.clear()
         listTodo.clear()
     }
 
     private fun updateList() {
-        clearLists()
+//        clearLists()
         getTasks()
     }
 
@@ -134,15 +138,20 @@ class TaskAndUserUseCase(
         updateList()
     }
 
-    fun editTask(task: TaskItemUiState) {
-        repository.editTask()
+    suspend fun editTask(task: Task) {
+        repository.editTask(task)
+        updateList()
     }
 
     private fun separate(taskItemUiState: TaskItemUiState, index: Int) {
-        when(taskItemUiState.state) {
+        when (taskItemUiState.state) {
             TaskState.DONE -> listDone.add(index)
             TaskState.DOING -> listDoing.add(index)
             TaskState.TODO -> listTodo.add(index)
         }
+    }
+
+    fun getTaskOfDay(from: Long, to: Long): LiveData<List<Task>> {
+        return MutableLiveData()
     }
 }

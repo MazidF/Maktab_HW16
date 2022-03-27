@@ -4,10 +4,15 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.hw16.model.SubTask
 import com.example.hw16.model.Task
 import com.example.hw16.model.User
 
-@Database(entities = [User::class, Task::class], version = 1, exportSchema = true)
+@Database(
+    entities = [User::class, Task::class, SubTask::class],
+    version = 1,
+    exportSchema = true
+)
 abstract class MyDatabase : RoomDatabase() {
 
     abstract fun getUserDao(): UserDao

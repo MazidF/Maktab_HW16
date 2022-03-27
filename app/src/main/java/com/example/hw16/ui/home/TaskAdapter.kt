@@ -5,8 +5,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.hw16.databinding.TaskItemBinding
+import com.example.hw16.databinding.ItemTaskBinding
 import com.example.hw16.model.TaskItemUiState
+import com.example.hw16.utils.logger
 import java.util.*
 
 class TaskAdapter(
@@ -17,7 +18,7 @@ class TaskAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = TaskItemBinding.inflate(inflater, parent, false)
+        val binding = ItemTaskBinding.inflate(inflater, parent, false)
         return TaskHolder(binding, onClick)
     }
 
@@ -53,7 +54,7 @@ class TaskAdapter(
 }
 
 class TaskHolder(
-    private val binding: TaskItemBinding,
+    private val binding: ItemTaskBinding,
     onClick: (TaskItemUiState) -> Unit = {}
 ) : RecyclerView.ViewHolder(binding.root) {
     init {
@@ -69,7 +70,10 @@ class TaskHolder(
     }
 }
 
-class TaskListAdapter(private val indexList: List<Int>? = null, private val onClick: (TaskItemUiState) -> Unit = {}) :
+class TaskListAdapter(
+    private var indexList: List<Int>? = null,
+    private val onClick: (TaskItemUiState) -> Unit = {}
+) :
     ListAdapter<TaskItemUiState, TaskHolder>(DIFF_CALLBACK) {
 
     companion object {
@@ -95,15 +99,23 @@ class TaskListAdapter(private val indexList: List<Int>? = null, private val onCl
         }
     }
 
+    override fun getItemCount() = indexList?.size ?: super.getItemCount()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskHolder {
         val inflater = LayoutInflater.from(parent.context)
         return TaskHolder(
-            TaskItemBinding.inflate(inflater, parent, false),
+            ItemTaskBinding.inflate(inflater, parent, false),
             onClick
         )
     }
 
     override fun onBindViewHolder(holder: TaskHolder, position: Int) {
         holder.bind(getItem(indexList?.get(position) ?: position))
+    }
+
+    fun customSubmit(list: List<TaskItemUiState>, indexList: List<Int>?) {
+        this.indexList = indexList
+        submitList(list)
+        logger("customSubmit")
     }
 }

@@ -11,7 +11,7 @@
     </data>
 
     <LinearLayout
-        android:gravity="center_horizontal"
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/profile_background"
@@ -25,6 +25,7 @@
             android:layout_height="120dp"
             android:background="@color/white"
             android:src="@drawable/ic_user"
+            app:imageDrawable='@{@drawable/ic_user}'
             app:image='@{user.imageUri}'/>
 
         <TextView

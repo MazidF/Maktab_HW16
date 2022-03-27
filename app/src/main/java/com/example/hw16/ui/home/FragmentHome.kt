@@ -11,7 +11,6 @@ import com.example.hw16.databinding.FragmentHomeBinding
 import com.example.hw16.di.MyViewModelFactory
 import com.example.hw16.model.TaskState.*
 import com.example.hw16.ui.App
-import com.example.hw16.ui.MyFragmentPagerManager
 import com.example.hw16.ui.ViewModelMain
 import com.example.hw16.utils.logger
 import com.google.android.material.tabs.TabLayoutMediator
@@ -47,10 +46,6 @@ class FragmentHome : Fragment() {
     private fun init() {
         modelMain.user.observe(viewLifecycleOwner) {
             if (it == null) return@observe
-            with(model) {
-                model.user = it
-                getTasks(requireContext())
-            }
         }
         with(binding) {
             initViewPager()

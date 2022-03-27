@@ -1,20 +1,19 @@
 package com.example.hw16.data
 
 import android.content.Context
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.map
 import com.example.hw16.data.local.FileLocalDataSource
 import com.example.hw16.data.local.FileType
 import com.example.hw16.data.local.TaskDataSource
 import com.example.hw16.data.local.UserDataSource
 import com.example.hw16.model.Task
 import com.example.hw16.model.User
-import com.example.hw16.utils.observeForever
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import java.io.File
 import java.io.Serializable
-import java.lang.Exception
-import java.util.concurrent.ExecutorService
 
 class MyRepository(
     private val userDataSource: UserDataSource,

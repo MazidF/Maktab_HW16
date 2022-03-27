@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="android.graphics.Color"/>
+        <import type="com.example.hw16.model.TaskState"/>
+        <import type="com.example.hw16.model.TaskItemUiState"/>
+        <variable
+            name="task"
+            type="TaskItemUiState" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_margin="3dp"
+        android:id="@+id/task_item_root"
+        app:cardCornerRadius="8dp"
+        android:backgroundTint="#DCDCDC"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="match_parent"
+                app:stateColor='@{task.state}'/>
+
+            <RadioButton
+                android:checked='@{task.state == TaskState.DONE}'
+                android:id="@+id/task_item_radio_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:padding="2dp"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    app:drawLine='@{task.state == TaskState.DONE}'
+                    android:textColor="@color/black"
+                    android:ellipsize="end"
+                    android:layout_weight="1"
+                    android:text='@{task.title, default="Doing signal home work"}'
+                    android:textSize="18dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/task_item_date"
+                        android:text="12/2"
+                        android:layout_marginEnd="3dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <ImageView
+                        android:src="@drawable/ic_sub_task"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp" />
+
+                    <ImageView
+                        android:src="@drawable/ic_sub_task"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp" />
+
+                    <ImageView
+                        android:src="@drawable/ic_sub_task"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+</layout>

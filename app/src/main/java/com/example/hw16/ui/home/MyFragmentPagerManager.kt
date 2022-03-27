@@ -1,12 +1,8 @@
-package com.example.hw16.ui
+package com.example.hw16.ui.home
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
-import androidx.fragment.app.commit
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.example.hw16.ui.home.FragmentHomeSub
 
 class MyFragmentPagerManager(
     fragment: Fragment,

@@ -6,7 +6,7 @@ import com.example.hw16.data.local.FileLocalDataSource
 import com.example.hw16.data.local.TaskDataSource
 import com.example.hw16.data.local.UserDataSource
 import com.example.hw16.data.local.db.MyDatabase
-import java.util.concurrent.Executors
+import com.example.hw16.domain.TaskAndUserUseCase
 
 class MyServiceLocator(context: Context) {
     private val database = MyDatabase.getDatabase(context)
@@ -15,5 +15,7 @@ class MyServiceLocator(context: Context) {
     private val taskDao = database.getTaskDao()
     private val taskDataSource = TaskDataSource(taskDao)
     private val fileDatabase = FileLocalDataSource()
-    val repository = MyRepository(userDataSource, taskDataSource, fileDatabase)
+    private val repository = MyRepository(userDataSource, taskDataSource, fileDatabase)
+    private val filesDir = context.filesDir
+    val taskAndUserUseCase = TaskAndUserUseCase(repository, filesDir)
 }

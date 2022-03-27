@@ -6,28 +6,21 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.hw16.data.MyRepository
 import com.example.hw16.data.local.FileType
+import com.example.hw16.domain.TaskAndUserUseCase
 import com.example.hw16.model.Task
 import com.example.hw16.model.User
-import com.example.hw16.ui.ProgressResult.FAIL
-import com.example.hw16.ui.ProgressResult.SUCCESS
-import com.example.hw16.utils.createDatePicker
-import com.example.hw16.utils.createTimePicker
-import com.example.hw16.utils.isToday
-import com.example.hw16.utils.observeForever
+import com.example.hw16.utils.*
 import kotlinx.coroutines.launch
-import java.io.ByteArrayOutputStream
 
 class ViewModelMain(
-    private val repository: MyRepository
+    private val useCase: TaskAndUserUseCase
 ) : ViewModel() {
 
     val error by lazy {
         MutableLiveData<ProgressResult>()
     }
-    private val _user = MutableLiveData<User?>()
-    val user: LiveData<User?> = _user
+    val user: LiveData<User?> = useCase.user
 
     fun createPicker(context: Context, cb: (Int, Int, Int, Int, Int) -> Unit) {
         createDatePicker(context) { year, month, day ->
@@ -39,63 +32,42 @@ class ViewModelMain(
 
     fun addTask(task: Task) {
         viewModelScope.launch {
-            repository.addTask(task)
+            useCase.addTask(task)
         }
     }
 
     fun logout() {
-        _user.value = null
+        useCase.logout()
     }
 
     fun login(userName: String, password: String, setError: Boolean = true) {
-        val liveData = repository.logInUser(userName, password)
+        logger("login")
+        val liveData = useCase.login(userName, password)
         observeForever(liveData) {
-            if (it.first) {
-                it.second?.let { user ->
-                    _user.value = user
-                    if (setError) {
-                        error.value = SUCCESS
-                    }
-                    return@observeForever
-                }
-            }
+            if (it == null) return@observeForever
             if (setError) {
-                error.value = FAIL
+                error.value = it
             }
         }
     }
 
     fun signIn(user: User, setError: Boolean = true) {
+        logger("sign_in")
         viewModelScope.launch {
-            observeForever(repository.signInUser(user)) {
-                if (it != null) {
-                    _user.value = it
-                    if (setError) {
-                        error.value = SUCCESS
-                    }
-                } else if (setError) {
-                    error.value = FAIL
+            observeForever(useCase.signIn(user)) {
+                if (it == null) return@observeForever
+                if (setError) {
+                    error.value = it
                 }
             }
         }
     }
 
     fun saveImageToFile(context: Context, fileType: FileType, bitmap: Bitmap): String? {
-        val output = ByteArrayOutputStream()
-        if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, output)) {
-            return null
-        }
-        val fileName = System.currentTimeMillis().toString()
-        return repository.save(
-            context,
-            fileType,
-            fileName,
-            output.toByteArray(),
-            waitUntilFileIsReady = true
-        )
+        return useCase.saveImageToFile(context, fileType, bitmap)
     }
 
     fun removeFile(uri: String) {
-        repository.removeFile(uri)
+        useCase.removeFile(uri)
     }
 }

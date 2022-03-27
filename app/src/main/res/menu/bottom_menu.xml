@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:icon="@drawable/ic_camera"
-        android:title="asdfa"
-        android:id="@+id/ca"/>
+    <item android:icon="@drawable/ic_content"
+        android:title="Tasks"
+        android:id="@id/fragmentHome"/>
 
-    <item android:icon="@drawable/ic_plus"
-        android:title="place"
-        android:id="@+id/asf"/>
+    <item android:icon="@drawable/ic_calendar"
+        android:title="Calendar"
+        android:id="@id/fragmentCalendar"/>
 
 </menu>

@@ -1,11 +1,12 @@
 package com.example.hw16.utils
 
+import android.graphics.Color.*
+import android.graphics.Paint
 import android.graphics.drawable.Drawable
-import android.util.Log
 import android.view.View
 import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
@@ -14,10 +15,11 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.example.hw16.R
+import com.example.hw16.model.TaskState
 import com.ms.square.android.expandabletextview.ExpandableTextView
 
-@BindingAdapter("app:image")
-fun setImageFromUri(imageView: ImageView, uri: String?) {
+@BindingAdapter("app:image", "app:imageDrawable", requireAll = false)
+fun setImageFromUri(imageView: ImageView, uri: String?, drawable: Drawable? = null) {
     if (uri != null) {
         Glide.with(imageView.context)
             .load(uri)
@@ -43,7 +45,7 @@ fun setImageFromUri(imageView: ImageView, uri: String?) {
             })
             .into(imageView)
     } else {
-        imageView.setImageDrawable(null)
+        imageView.setImageDrawable(drawable)
     }
 }
 
@@ -55,4 +57,23 @@ fun isVisible(view: View, bool: Boolean) {
 @BindingAdapter("app:setText")
 fun setText(view: ExpandableTextView, text: String) {
     view.text = text
+}
+
+@BindingAdapter("app:stateColor")
+fun stateColor(view: View, state: TaskState) {
+    val color = when(state) {
+        TaskState.DONE -> GREEN
+        TaskState.DOING -> BLUE
+        TaskState.TODO -> RED
+    }
+    view.setBackgroundColor(color)
+}
+
+@BindingAdapter("app:drawLine")
+fun drawLine(textView: TextView, bool: Boolean) {
+    textView.paintFlags = if (bool) {
+        textView.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+    } else {
+        textView.paintFlags
+    }
 }

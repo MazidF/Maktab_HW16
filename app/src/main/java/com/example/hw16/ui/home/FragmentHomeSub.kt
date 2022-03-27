@@ -9,17 +9,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL
+import com.example.hw16.R
 import com.example.hw16.databinding.FragmentHomeSubBinding
-import com.example.hw16.databinding.SnackbarOneBtnBinding
 import com.example.hw16.di.MyViewModelFactory
-import com.example.hw16.model.TaskItemUiState
 import com.example.hw16.model.TaskState.*
 import com.example.hw16.ui.App
 import com.example.hw16.ui.home.MyItemTouchHelperCallback.Companion.connect
+import com.example.hw16.utils.Mapper.toTask
+import com.example.hw16.utils.logger
 import com.google.android.material.snackbar.Snackbar
-import kotlin.collections.ArrayList
 
 class FragmentHomeSub : Fragment() {
     val model: ViewModelHome by activityViewModels(factoryProducer = {
@@ -44,14 +42,14 @@ class FragmentHomeSub : Fragment() {
     }
 
     private fun init() {
-        initDialog()
-
         adapter = TaskListAdapter()
 
-        model.notifyState.observe(viewLifecycleOwner) {
+        model.tasks.observe(viewLifecycleOwner) {
+            logger("model.task.observe")
             if (it == null) return@observe
-            adapter.submitList(getList())
-            model.notifyState.value = null
+            val indexList = getIndexList()
+            adapter.customSubmit(it, indexList)
+            binding.isEmpty = indexList?.isEmpty() ?: it.isEmpty()
         }
 
         with(binding) {
@@ -68,51 +66,43 @@ class FragmentHomeSub : Fragment() {
     }
 
     private fun onDragItem(from: Int, to: Int): Boolean {
-//        adapter.swap(from, to)
-//        return true
         return false
     }
 
     @SuppressLint("SetTextI18n")
     private fun onSwipeItem(position: Int) {
-/*        val item = adapter.currentList[position]
-        adapter.remove(position)
-
-        val view = SnackbarOneBtnBinding.inflate(layoutInflater).apply {
-            snackbarBtn.setOnClickListener {
-                adapter.add(item, position)
-            }
-            snackbarMessage.apply {
-                text = "${item.title} removed!!"
-            }
-        }.root
+        val item = adapter.currentList[position]
+        model.removeTask(item)
         Snackbar.make(
-            view, "Notice!!", Snackbar.LENGTH_LONG
+            requireActivity().findViewById(R.id.coordinator),
+            "${item.title} removed!!",
+            Snackbar.LENGTH_LONG
         ).apply {
-            setAction("dismiss") {
-                model.removeItems(item)
+            setAction("Undo") {
+                model.addTask(item.toTask(model.user.value!!.username))
             }
-        }.show()*/
+/*            addCallback(object : Snackbar.Callback() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    super.onDismissed(transientBottomBar, event)
+                    model.removeImage(item.image_uri)
+                }
+            })*/
+        }.show()
     }
 
-    private fun initDialog() {
-
-    }
-
-    private fun getList(): ArrayList<TaskItemUiState> {
+    private fun getIndexList(): List<Int>? {
         val args = requireArguments()
         return when (args["state"]) {
             DONE.name -> model.listDone
             DOING.name -> model.listDoing
             TODO.name -> model.listTodo
-            else -> model.taskList.value!!
+            else -> null
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onResume() {
         super.onResume()
-        adapter.notifyDataSetChanged()
         Log.d("FragmentHomeSub", requireArguments()["state"].toString() + " resumed")
     }
 

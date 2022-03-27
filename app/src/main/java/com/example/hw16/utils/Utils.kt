@@ -1,10 +1,13 @@
 package com.example.hw16.utils
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import android.view.View
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,8 +17,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import com.example.hw16.model.Task
-import com.example.hw16.model.TaskItemUiState
 import com.example.hw16.model.TaskState
+import com.google.android.material.snackbar.Snackbar
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.Calendar.*
 
@@ -72,15 +76,16 @@ fun Task.getState(isDone: Boolean, deadline: Long): TaskState {
     }
 }
 
-fun Task.getTime(deadline: Long): String {
+fun getTime(deadline: Long): String {
     val date = Date(deadline)
     return with(date) {
         "${year + 1900}/${month.format()}/${day.format()}  &  ${hours.format()}:${minutes.format()}"
     }
 }
 
-fun TaskItemUiState.getDeadline(time: String): Long {
-    Tempo.now
+@SuppressLint("SimpleDateFormat")
+fun getDeadline(time: String): Long {
+    return SimpleDateFormat("yyyy/MM/dd  &  hh:mm").parse(time)?.time ?: -1
 }
 
 fun <T> observeForever(liveData: LiveData<T>, obs: Observer<T>) {
@@ -121,4 +126,9 @@ fun NavController.popUpToNavigate(
 
 fun logger(msg: String) {
     Log.d("app_log", msg)
+}
+
+fun showSnackBar(activity: Activity, message: String?, duration: Int = Snackbar.LENGTH_LONG) {
+    val rootView: View = activity.window.decorView.findViewById(android.R.id.content)
+    Snackbar.make(rootView, message!!, duration).show()
 }

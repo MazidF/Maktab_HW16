@@ -41,8 +41,8 @@ class MyRepository(
         return subTaskDataSource.insert(subTask)[0]
     }
 
-    suspend fun editSubTask(subTask: SubTask) {
-        subTaskDataSource.update(subTask)
+    suspend fun editSubTask(vararg subTask: SubTask) {
+        subTaskDataSource.update(*subTask)
     }
 
     fun searchTasks(

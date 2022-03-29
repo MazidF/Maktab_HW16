@@ -28,12 +28,19 @@
             app:radioColorDisable='@{"#FF000000"}'
             app:radioColorEnable='@{"#FFD5D5D5"}' />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"/>
+
         <EditText
             app:drawLine='@{subTask.done}'
             android:id="@+id/sub_task_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:text='@{subTask.title}'
             android:background="@android:color/transparent"
             android:hint="@string/sub_task_title"
             android:textColor="@color/black"

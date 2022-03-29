@@ -16,7 +16,7 @@ interface MyDao<Item, PrimaryKey> {
     @Delete
     suspend fun deleteItem(vararg items: Item)
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateItem(vararg item: Item): Int
 
     fun find(primaryKey: PrimaryKey): Flow<Item?>

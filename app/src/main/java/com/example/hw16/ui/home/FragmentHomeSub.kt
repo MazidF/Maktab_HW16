@@ -10,7 +10,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Recycler
 import com.example.hw16.R
 import com.example.hw16.databinding.FragmentHomeSubBinding
 import com.example.hw16.di.MyViewModelFactory
@@ -21,6 +24,7 @@ import com.example.hw16.ui.home.MyItemTouchHelperCallback.Companion.connect
 import com.example.hw16.utils.Mapper.toTask
 import com.example.hw16.utils.logger
 import com.google.android.material.snackbar.Snackbar
+
 
 class FragmentHomeSub : Fragment() {
     private val navController by lazy {
@@ -53,7 +57,7 @@ class FragmentHomeSub : Fragment() {
             model.editTask(it.toTask(model.user.value!!.username, isDone))
         })
 
-        a().observe(viewLifecycleOwner) {
+        getList().observe(viewLifecycleOwner) {
             val name = requireArguments()["state"].toString()
             if (it == null) return@observe
             val list = it
@@ -70,7 +74,16 @@ class FragmentHomeSub : Fragment() {
                     onDrag = this@FragmentHomeSub::onDragItem,
                     onSwipe = this@FragmentHomeSub::onSwipeItem
                 )
-                layoutManager = LinearLayoutManager(requireContext())
+                layoutManager = object : LinearLayoutManager(requireContext()) {
+                    override fun onLayoutChildren(recycler: Recycler?, state: RecyclerView.State?) {
+                        try {
+                            super.onLayoutChildren(recycler, state)
+                        } catch (e: IndexOutOfBoundsException) {
+                            // TODO: Something
+                        }
+                    }
+                }
+
             }
         }
     }
@@ -84,21 +97,25 @@ class FragmentHomeSub : Fragment() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun onSwipeItem(position: Int) {
+    private fun onSwipeItem(position: Int, direction: Int) {
         val item = adapter.getItem(position)
-        model.removeTask(item)
-        Snackbar.make(
-            requireActivity().findViewById(R.id.coordinator),
-            "${item.title} removed!!",
-            Snackbar.LENGTH_LONG
-        ).apply {
-            setAction("Undo") {
-                model.addTask(item.toTask(model.user.value!!.username))
-            }
-        }.show()
+        if (ItemTouchHelper.LEFT == direction) {
+            model.removeTask(item)
+            Snackbar.make(
+                requireActivity().findViewById(R.id.coordinator),
+                "${item.title} removed!!",
+                Snackbar.LENGTH_LONG
+            ).apply {
+                setAction("Undo") {
+                    model.addTask(item.toTask(model.user.value!!.username))
+                }
+            }.show()
+        } else {
+            model.editTask(item.toTask(model.user.value!!.username, item.isDone().not()))
+        }
     }
 
-    private fun a(): LiveData<ArrayList<TaskItemUiState>> {
+    private fun getList(): LiveData<ArrayList<TaskItemUiState>> {
         val args = requireArguments()
         with(model) {
             return when (args["state"]) {

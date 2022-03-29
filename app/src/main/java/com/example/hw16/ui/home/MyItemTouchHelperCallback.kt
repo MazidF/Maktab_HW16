@@ -6,8 +6,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 class MyItemTouchHelperCallback(
     val onDrag: (Int, Int) -> Boolean = { _, _ -> false },
-    val onSwipe: (Int) -> Unit = {}
-) : ItemTouchHelper.SimpleCallback(UP or DOWN or RIGHT or LEFT, LEFT) {
+    val onSwipe: (Int, Int) -> Unit = { _, _ -> }
+) : ItemTouchHelper.SimpleCallback(UP or DOWN or RIGHT or LEFT, LEFT or RIGHT) {
     override fun onMove(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder,
@@ -20,13 +20,13 @@ class MyItemTouchHelperCallback(
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         val position = viewHolder.adapterPosition
-        onSwipe(position)
+        onSwipe(position, direction)
     }
 
     companion object {
         fun RecyclerView.connect(
             onDrag: (Int, Int) -> Boolean = { _, _ -> false },
-            onSwipe: (Int) -> Unit = {}
+            onSwipe: (Int, Int) -> Unit = { _, _ -> }
         ) {
             ItemTouchHelper(MyItemTouchHelperCallback(onDrag, onSwipe))
                 .attachToRecyclerView(this)

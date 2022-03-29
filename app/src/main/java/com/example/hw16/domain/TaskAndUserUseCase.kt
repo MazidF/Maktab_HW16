@@ -101,7 +101,7 @@ class TaskAndUserUseCase(
             }
             val now = System.currentTimeMillis()
             val firstDoing = resultList.indexOfFirst {
-                it.deadline.time > now
+                it.deadline.time > now && it.isDone().not()
             }
             val firstDone = resultList.indexOfFirst {
                 it.isDone()
@@ -119,7 +119,7 @@ class TaskAndUserUseCase(
                 listDoing.value = ArrayList()
                 if (firstDone != -1) {
                     listTodo.value = ArrayList(resultList.subList(0, firstDone))
-                    listDone.value = ArrayList()
+                    listDone.value = ArrayList(resultList.subList(firstDone, resultList.size))
                 } else {
                     listTodo.value = ArrayList(resultList.subList(0, resultList.size))
                     listDone.value = ArrayList()
@@ -170,8 +170,8 @@ class TaskAndUserUseCase(
         repository.removeSubTask(subTask.id)
     }
 
-    suspend fun editSubTask(subTask: SubTask) {
-        repository.editSubTask(subTask)
+    suspend fun editSubTask(vararg subTask: SubTask) {
+        repository.editSubTask(*subTask)
     }
 
     private fun separate(taskItemUiState: TaskItemUiState) {

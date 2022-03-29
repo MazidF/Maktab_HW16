@@ -1,5 +1,6 @@
 package com.example.hw16.ui.task
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.widget.doOnTextChanged
@@ -12,13 +13,14 @@ import java.util.*
 
 
 class SubTaskAdapter(
-    private var list: ArrayList<SubTaskItemUiState>,
-    private val viewHolderApply: (SubTaskHolder) -> Unit = {},
+    private var list: List<SubTaskItemUiState>,
+    private val onRemoveItem: (SubTaskItemUiState) -> Unit = {},
     private val onClick: (SubTaskItemUiState) -> Unit = {}
 ) : RecyclerView.Adapter<SubTaskAdapter.SubTaskHolder>() {
 
-    private var lastSubTask: SubTaskItemUiState? = null
     private val diffCallback = SubTaskDiffCallback(list, listOf())
+
+    fun getList() = list
 
     class SubTaskDiffCallback(
         var newList: List<SubTaskItemUiState>,
@@ -93,7 +95,7 @@ class SubTaskAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubTaskHolder {
         val binding = SubTaskItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return SubTaskHolder(binding.apply { subTaskTitle.requestFocus() }).apply(viewHolderApply)
+        return SubTaskHolder(binding.apply { subTaskTitle.requestFocus() })
     }
 
     override fun onBindViewHolder(holder: SubTaskHolder, position: Int) {
@@ -102,14 +104,12 @@ class SubTaskAdapter(
 
     override fun getItemCount() = list.size
 
+    @SuppressLint("NotifyDataSetChanged")
     fun submitList(updateList: List<SubTaskItemUiState>) {
-        submitList(ArrayList(updateList))
-    }
-
-    fun submitList(updateList: ArrayList<SubTaskItemUiState>) {
         list = updateList
-        val diff = diffCallback.submitList(updateList)
-        diff.dispatchUpdatesTo(this)
+//        val diff = diffCallback.submitList(updateList)
+//        diff.dispatchUpdatesTo(this)
+        notifyDataSetChanged()
     }
 
     fun moveItem(from: Int, to: Int) {
@@ -117,30 +117,10 @@ class SubTaskAdapter(
         notifyItemMoved(from, to)
     }
 
-    fun addItem(subTaskItemUiState: SubTaskItemUiState) {
-        lastSubTask?.run {
-            if (title.isBlank()) {
-                removeLastItem()
-            }
-        }
-        lastSubTask = subTaskItemUiState
-        list.add(subTaskItemUiState)
-        notifyItemInserted(list.lastIndex)
-    }
-
     fun remove(position: Int) {
         if (position >= 0) {
-            list.removeAt(position)
-            notifyItemRemoved(position)
-        }
-    }
-
-    private fun removeLastItem() {
-        remove(list.size - 1)
-        lastSubTask = if (list.isNotEmpty()) {
-            list.last()
-        } else {
-            null
+            val item = list[position]
+            onRemoveItem(item)
         }
     }
 }

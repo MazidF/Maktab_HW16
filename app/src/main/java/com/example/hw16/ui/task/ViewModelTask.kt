@@ -42,6 +42,12 @@ class ViewModelTask(
         }
     }
 
+    fun editSubTasks(vararg subTasks: SubTask) {
+        viewModelScope.launch {
+            useCase.editSubTask(*subTasks)
+        }
+    }
+
     fun removeSubTask(ownerId: Long, subTask: SubTaskItemUiState) {
         viewModelScope.launch {
             useCase.removeSubTask(subTask)
@@ -49,7 +55,7 @@ class ViewModelTask(
         }
     }
 
-    private fun getSubTasks(ownerId: Long) {
+    fun getSubTasks(ownerId: Long) {
         observeForever(useCase.getSubTasksOfTask(ownerId)) {
             _subTasks.value = it
         }

@@ -44,12 +44,12 @@ object Mapper {
         )
     }
 
-    fun SubTaskItemUiState.toSubTask(taskOwnerId: Long) : SubTask {
+    fun SubTaskItemUiState.toSubTask(taskOwnerId: Long, pos: Int = position) : SubTask {
         return SubTask(
             id = id,
             title = title,
             isDone = isDone,
-            position = position,
+            position = pos,
             ownerId = taskOwnerId
         )
     }

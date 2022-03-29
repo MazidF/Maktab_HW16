@@ -14,10 +14,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.hw16.databinding.FragmentTaskBinding
 import com.example.hw16.di.MyViewModelFactory
 import com.example.hw16.model.SubTask
-import com.example.hw16.model.SubTaskItemUiState
 import com.example.hw16.model.Task
 import com.example.hw16.model.TaskWithSubTask
 import com.example.hw16.ui.App
+import com.example.hw16.utils.Mapper.toSubTask
 import com.example.hw16.utils.Mapper.toSubTaskItemUiState
 import com.example.hw16.utils.createPicker
 import com.example.hw16.utils.observeForever
@@ -25,6 +25,7 @@ import com.example.hw16.utils.toDate
 import java.util.*
 
 class FragmentTask : Fragment() {
+    private lateinit var adapter: SubTaskAdapter
     private val model: ViewModelTask by viewModels(factoryProducer = {
         MyViewModelFactory(App.serviceLocator)
     })
@@ -53,7 +54,7 @@ class FragmentTask : Fragment() {
             if (taskWithSubTask.task.isDone) {
                 root.setOnTouchListener { _, _ -> true }
             }
-            recyclerInit()
+            recyclerInit(taskWithSubTask.task.id)
             taskDeadline.setOnClickListener {
                 createPicker(requireContext()) { year, month, day, hour, minute ->
                     deadline.value = toDate(year, month, day, hour, minute)
@@ -62,42 +63,48 @@ class FragmentTask : Fragment() {
         }
     }
 
-    private fun recyclerInit() {
-        val adapter = SubTaskAdapter(arrayListOf())
+    private fun recyclerInit(ownerId: Long) {
+        adapter = SubTaskAdapter(arrayListOf(), onRemoveItem = {
+            model.removeSubTask(ownerId, it)
+            binding.taskAddSubTask.requestFocus()
+        })
         model.subTasks.observe(viewLifecycleOwner) {
             if (it != null) {
                 adapter.submitList(it.map { subTask ->
                     subTask.toSubTaskItemUiState()
                 })
+                binding.taskAddSubTask.requestFocus()
             }
         }
         with(binding.taskSubTaskList) {
-            this.adapter = adapter
+            this.adapter = this@FragmentTask.adapter
             layoutManager = GridLayoutManager(requireContext(), 1)
             SubTaskItemHelper(::onDrag, ::onSwipe).connect(this)
         }
         binding.taskAddSubTask.setOnClickListener {
-            adapter.addItem(SubTaskItemUiState.empty(adapter.itemCount))
+            addSubTask(ownerId, "", adapter.itemCount)
         }
+        model.getSubTasks(ownerId)
     }
 
     private fun onSwipe(position: Int, direction: Int) {
 
     }
 
-    private fun onDrag(from: Int, to: Int) : Boolean {
-        return false
+    private fun onDrag(from: Int, to: Int): Boolean {
+        adapter.moveItem(from, to)
+        return true
     }
 
-    private fun addSubTask(ownerId: Long, subTaskTitle: String, position: Int) {
-        model.addSubTask(
-            SubTask(
-                ownerId = ownerId,
-                title = subTaskTitle,
-                isDone = false,
-                position = position
-            )
+    private fun addSubTask(ownerId: Long, subTaskTitle: String, position: Int): SubTask {
+        val result = SubTask(
+            ownerId = ownerId,
+            title = subTaskTitle,
+            isDone = false,
+            position = position
         )
+        model.addSubTask(result)
+        return result
     }
 
     private fun loadTask() {
@@ -128,7 +135,17 @@ class FragmentTask : Fragment() {
             newTask.let {
                 model.editTask(it)
             }
+            updateSubTasks(task.id)
         }
+    }
+
+    private fun updateSubTasks(ownerId: Long) {
+        val list = adapter.getList().filter {
+            it.title.isNotBlank()
+        }.mapIndexed { i, it ->
+            it.toSubTask(ownerId, i)
+        }
+        model.editSubTasks(*list.toTypedArray())
     }
 
     private fun createTask(): Task {

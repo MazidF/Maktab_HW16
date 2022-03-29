@@ -74,8 +74,8 @@ fun stateColor(view: View, state: TaskState) {
 }
 
 @BindingAdapter("app:drawLine")
-fun drawLine(textView: TextView, bool: Boolean) {
-    textView.paintFlags = if (bool) {
+fun drawLine(textView: TextView, bool: Boolean?) {
+    textView.paintFlags = if (bool == true) {
         textView.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
     } else {
         textView.paintFlags

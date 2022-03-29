@@ -85,7 +85,7 @@ class FragmentHomeSub : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun onSwipeItem(position: Int) {
-        val item = adapter.currentList[position]
+        val item = adapter.getItem(position)
         model.removeTask(item)
         Snackbar.make(
             requireActivity().findViewById(R.id.coordinator),
@@ -108,7 +108,7 @@ class FragmentHomeSub : Fragment() {
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+/*    @SuppressLint("NotifyDataSetChanged")
     override fun onResume() {
         super.onResume()
         Log.d("FragmentHomeSub", requireArguments()["state"].toString() + " resumed")
@@ -127,6 +127,6 @@ class FragmentHomeSub : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d("FragmentHomeSub", requireArguments()["state"].toString() + " destroyed")
-    }
+    }*/
 
 }

@@ -11,6 +11,10 @@ class IndexedList<T>(collection: Collection<T>, private val indexList: List<Int>
         return super.get(getIndex(index))
     }
 
+    override fun isEmpty(): Boolean {
+        return indexList?.isEmpty() ?: super.isEmpty()
+    }
+
     override fun set(index: Int, element: T): T {
         return super.set(getIndex(index), element)
     }
@@ -20,10 +24,26 @@ class IndexedList<T>(collection: Collection<T>, private val indexList: List<Int>
     }
 
     override fun toString(): String {
-        return super<java.util.ArrayList>.toString() + "\n" + indexList.toString()
+        return "list size: (" + super.size.toString() + ", " + this.size + ")\n" + indexList.toString()
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableList<T> {
         return super.subList(getIndex(fromIndex), getIndex(toIndex))
+    }
+
+    override fun add(index: Int, element: T) {
+        throw Exception("!!")
+    }
+
+    override fun addAll(index: Int, elements: Collection<T>): Boolean {
+        throw Exception("!!")
+    }
+
+    override fun listIterator(index: Int): MutableListIterator<T> {
+        return super.listIterator(getIndex(index))
+    }
+
+    override fun removeRange(fromIndex: Int, toIndex: Int) {
+        super.removeRange(getIndex(fromIndex), getIndex(toIndex))
     }
 }

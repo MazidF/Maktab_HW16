@@ -143,6 +143,10 @@ class TaskListAdapter(
         return currentList[indexList?.get(position) ?: position]
     }*/
 
+    public override fun getItem(position: Int): TaskItemUiState {
+        return super.getItem(position)
+    }
+
     override fun onBindViewHolder(holder: TaskHolder, position: Int) {
 //        val safePosition = holder.adapterPosition
         holder.bind(getItem(position))

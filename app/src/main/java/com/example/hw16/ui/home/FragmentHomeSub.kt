@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.hw16.R
@@ -17,7 +18,6 @@ import com.example.hw16.model.TaskItemUiState
 import com.example.hw16.model.TaskState.*
 import com.example.hw16.ui.App
 import com.example.hw16.ui.home.MyItemTouchHelperCallback.Companion.connect
-import com.example.hw16.utils.IndexedList
 import com.example.hw16.utils.Mapper.toTask
 import com.example.hw16.utils.logger
 import com.google.android.material.snackbar.Snackbar
@@ -53,10 +53,10 @@ class FragmentHomeSub : Fragment() {
             model.editTask(it.toTask(model.user.value!!.username, isDone))
         })
 
-        model.tasks.observe(viewLifecycleOwner) {
+        a().observe(viewLifecycleOwner) {
             val name = requireArguments()["state"].toString()
             if (it == null) return@observe
-            val list = IndexedList(it, getIndexList())
+            val list = it
             adapter.customSubmit(list, commitMessage = "callback : $name")
             binding.isEmpty = list.isEmpty()
             logger("$name: $list")
@@ -98,35 +98,16 @@ class FragmentHomeSub : Fragment() {
         }.show()
     }
 
-    private fun getIndexList(): List<Int>? {
+    private fun a(): LiveData<ArrayList<TaskItemUiState>> {
         val args = requireArguments()
-        return when (args["state"]) {
-            DONE.name -> model.listDone
-            DOING.name -> model.listDoing
-            TODO.name -> model.listTodo
-            else -> null
+        with(model) {
+            return when (args["state"]) {
+                DONE.name -> listDone
+                DOING.name -> listDoing
+                TODO.name -> listTodo
+                else -> tasks
+            }
         }
     }
-
-/*    @SuppressLint("NotifyDataSetChanged")
-    override fun onResume() {
-        super.onResume()
-        Log.d("FragmentHomeSub", requireArguments()["state"].toString() + " resumed")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d("FragmentHomeSub", requireArguments()["state"].toString() + " stoped")
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.d("FragmentHomeSub", requireArguments()["state"].toString() + " created")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("FragmentHomeSub", requireArguments()["state"].toString() + " destroyed")
-    }*/
 
 }

@@ -1,5 +1,6 @@
 package com.example.hw16.ui.home
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hw16.domain.TaskAndUserUseCase
@@ -11,10 +12,10 @@ class ViewModelHome(
     private val useCase: TaskAndUserUseCase
 ) : ViewModel() {
     val user = useCase.user
-    var tasks = useCase.tasks
-    val listDone = useCase.listDone
-    val listDoing = useCase.listDoing
-    val listTodo = useCase.listTodo
+    var tasks: LiveData<ArrayList<TaskItemUiState>> = useCase.tasks
+    val listDone: LiveData<ArrayList<TaskItemUiState>> = useCase.listDone
+    val listDoing: LiveData<ArrayList<TaskItemUiState>> = useCase.listDoing
+    val listTodo: LiveData<ArrayList<TaskItemUiState>> = useCase.listTodo
 //    val viewPool = RecyclerView.RecycledViewPool()
 
     init {

@@ -78,35 +78,52 @@ class TaskAndUserUseCase(
     //////////////////////////////////////////////////////////
 
     private var taskList = ArrayList<TaskItemUiState>()
-    private val _tasks = MutableLiveData<List<TaskItemUiState>>()
-    val tasks: LiveData<List<TaskItemUiState>> = _tasks
+    private val _tasks = MutableLiveData<ArrayList<TaskItemUiState>>()
+    val tasks: LiveData<ArrayList<TaskItemUiState>> = _tasks
 
-    val listDone by lazy {
-        ArrayList<Int>(5)
-    }
+    val listDone = MutableLiveData<ArrayList<TaskItemUiState>>(ArrayList(5))
+    val listDoing = MutableLiveData<ArrayList<TaskItemUiState>>(ArrayList(5))
+    val listTodo = MutableLiveData<ArrayList<TaskItemUiState>>(ArrayList(5))
 
-    val listDoing by lazy {
-        ArrayList<Int>(5)
-    }
-
-    val listTodo by lazy {
-        ArrayList<Int>(5)
-    }
-
-    fun getTasks(fileType: FileType = FileType.IMAGE_FILE) {
+    fun getTasks() {
         val user = user.value ?: run {
             logger("user was null so end getTasks")
             return
         }
         val liveData = repository.getUserTasks(user.username).asLiveData()
-        val rootPath = rootFile.absolutePath + File.separator + fileType.value + File.separator
-        clearLists()
         observeForever(liveData) { list ->
-            val resultList = list.mapIndexed { index, task ->
-                task.toTaskItemUiState(/*if (task.image_uri == "") "" else rootPath + task.image_uri*/)
-                    .also { taskItemUiState ->
-                        separate(taskItemUiState, index)
-                    }
+            clearLists()
+            val resultList = list.map { task ->
+                task.toTaskItemUiState()
+                    /*.also { taskItemUiState ->
+                        separate(taskItemUiState)
+                    }*/
+            }
+            val now = System.currentTimeMillis()
+            val firstDoing = resultList.indexOfFirst {
+                it.deadline.time > now
+            }
+            val firstDone = resultList.indexOfFirst {
+                it.isDone()
+            }
+            if (firstDoing != -1) {
+                listTodo.value = ArrayList(resultList.subList(0, firstDoing))
+                if (firstDone != -1) {
+                    listDoing.value = ArrayList(resultList.subList(firstDoing, firstDone))
+                    listDone.value = ArrayList(resultList.subList(firstDone, resultList.size))
+                } else {
+                    listDoing.value = ArrayList(resultList.subList(firstDoing, resultList.size))
+                    listDone.value = ArrayList()
+                }
+            } else {
+                listDoing.value = ArrayList()
+                if (firstDone != -1) {
+                    listTodo.value = ArrayList(resultList.subList(0, firstDone))
+                    listDone.value = ArrayList()
+                } else {
+                    listTodo.value = ArrayList(resultList.subList(0, resultList.size))
+                    listDone.value = ArrayList()
+                }
             }
             taskList = ArrayList(resultList)
             _tasks.value = taskList
@@ -114,13 +131,19 @@ class TaskAndUserUseCase(
     }
 
     private fun clearLists() {
-        listDone.clear()
-        listDoing.clear()
-        listTodo.clear()
+        listDone.value!!.clear()
+        listDoing.value!!.clear()
+        listTodo.value!!.clear()
+    }
+
+    private fun notifyChanges() {
+        _tasks.value = taskList
+        listDone.value = listDone.value
+        listDoing.value = listDoing.value
+        listTodo.value = listTodo.value
     }
 
     private fun updateList() {
-//        clearLists()
         getTasks()
     }
 
@@ -151,11 +174,11 @@ class TaskAndUserUseCase(
         repository.editSubTask(subTask)
     }
 
-    private fun separate(taskItemUiState: TaskItemUiState, index: Int) {
+    private fun separate(taskItemUiState: TaskItemUiState) {
         when (taskItemUiState.state) {
-            TaskState.DONE -> listDone.add(index)
-            TaskState.DOING -> listDoing.add(index)
-            TaskState.TODO -> listTodo.add(index)
+            TaskState.DONE -> listDone.value!!.add(taskItemUiState)
+            TaskState.DOING -> listDoing.value!!.add(taskItemUiState)
+            TaskState.TODO -> listTodo.value!!.add(taskItemUiState)
         }
     }
 

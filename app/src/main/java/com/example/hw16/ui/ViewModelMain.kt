@@ -10,7 +10,8 @@ import com.example.hw16.data.local.FileType
 import com.example.hw16.domain.TaskAndUserUseCase
 import com.example.hw16.model.Task
 import com.example.hw16.model.User
-import com.example.hw16.utils.*
+import com.example.hw16.utils.logger
+import com.example.hw16.utils.observeForever
 import kotlinx.coroutines.launch
 
 class ViewModelMain(
@@ -21,14 +22,6 @@ class ViewModelMain(
         MutableLiveData<ProgressResult>()
     }
     val user: LiveData<User?> = useCase.user
-
-    fun createPicker(context: Context, cb: (Int, Int, Int, Int, Int) -> Unit) {
-        createDatePicker(context) { year, month, day ->
-            createTimePicker(context, isToday(year, month, day)) { hour, minute ->
-                cb(year, month, day, hour, minute)
-            }
-        }
-    }
 
     fun addTask(task: Task) {
         viewModelScope.launch {

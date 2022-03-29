@@ -8,18 +8,24 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.hw16.R
 import com.example.hw16.databinding.FragmentHomeSubBinding
 import com.example.hw16.di.MyViewModelFactory
+import com.example.hw16.model.TaskItemUiState
 import com.example.hw16.model.TaskState.*
 import com.example.hw16.ui.App
 import com.example.hw16.ui.home.MyItemTouchHelperCallback.Companion.connect
+import com.example.hw16.utils.IndexedList
 import com.example.hw16.utils.Mapper.toTask
 import com.example.hw16.utils.logger
 import com.google.android.material.snackbar.Snackbar
 
 class FragmentHomeSub : Fragment() {
+    private val navController by lazy {
+        findNavController()
+    }
     val model: ViewModelHome by activityViewModels(factoryProducer = {
         MyViewModelFactory(App.serviceLocator)
     })
@@ -42,19 +48,23 @@ class FragmentHomeSub : Fragment() {
     }
 
     private fun init() {
-        adapter = TaskListAdapter()
+        adapter = TaskListAdapter(onClick = ::onItemClick, onTaskEdit = { it, isDone ->
+            logger("$it \n isDone: $isDone")
+            model.editTask(it.toTask(model.user.value!!.username, isDone))
+        })
 
         model.tasks.observe(viewLifecycleOwner) {
-            logger("model.task.observe")
+            val name = requireArguments()["state"].toString()
             if (it == null) return@observe
-            val indexList = getIndexList()
-            adapter.customSubmit(it, indexList)
-            binding.isEmpty = indexList?.isEmpty() ?: it.isEmpty()
+            val list = IndexedList(it, getIndexList())
+            adapter.customSubmit(list, commitMessage = "callback : $name")
+            binding.isEmpty = list.isEmpty()
+            logger("$name: $list")
         }
 
         with(binding) {
             recyclerView.apply {
-                setRecycledViewPool(model.viewPool)
+//                setRecycledViewPool(model.viewPool)
                 this.adapter = this@FragmentHomeSub.adapter
                 connect(
                     onDrag = this@FragmentHomeSub::onDragItem,
@@ -63,6 +73,10 @@ class FragmentHomeSub : Fragment() {
                 layoutManager = LinearLayoutManager(requireContext())
             }
         }
+    }
+
+    private fun onItemClick(task: TaskItemUiState) {
+        navController.navigate(FragmentHomeDirections.actionFragmentHomeToFragmentTask(task.id))
     }
 
     private fun onDragItem(from: Int, to: Int): Boolean {
@@ -81,12 +95,6 @@ class FragmentHomeSub : Fragment() {
             setAction("Undo") {
                 model.addTask(item.toTask(model.user.value!!.username))
             }
-/*            addCallback(object : Snackbar.Callback() {
-                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                    super.onDismissed(transientBottomBar, event)
-                    model.removeImage(item.image_uri)
-                }
-            })*/
         }.show()
     }
 

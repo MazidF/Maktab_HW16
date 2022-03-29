@@ -17,7 +17,7 @@ interface MyDao<Item, PrimaryKey> {
     suspend fun deleteItem(vararg items: Item)
 
     @Update
-    suspend fun updateItem(vararg item: Item)
+    suspend fun updateItem(vararg item: Item): Int
 
     fun find(primaryKey: PrimaryKey): Flow<Item?>
 

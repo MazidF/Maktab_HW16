@@ -1,5 +1,7 @@
 package com.example.hw16.utils
 
+import com.example.hw16.model.SubTask
+import com.example.hw16.model.SubTaskItemUiState
 import com.example.hw16.model.Task
 import com.example.hw16.model.TaskItemUiState
 
@@ -12,17 +14,19 @@ object Mapper {
             deadline = deadline,
             image_uri = prefix ?: "" + image_uri,
             id = id,
-            state = getState(isDone, deadline)
+            state = getState()
         )
     }
 
-    fun TaskItemUiState.toTask(username: String): Task {
+    fun TaskItemUiState.toTask(username: String, isDone: Boolean = isDone()): Task {
         return Task(
+            id = id,
             title = title,
             description = description,
             deadline = deadline,
-            image_uri = getImageName(image_uri),
-            userName = username
+            image_uri = image_uri,
+            userName = username,
+            isDone = isDone
         )
     }
 
@@ -31,4 +35,22 @@ object Mapper {
         return imageUri.substring(index + 1)
     }
 
+    fun SubTask.toSubTaskItemUiState() : SubTaskItemUiState {
+        return SubTaskItemUiState(
+            id = id,
+            title = title,
+            isDone = isDone,
+            position = position
+        )
+    }
+
+    fun SubTaskItemUiState.toSubTask(taskOwnerId: Long) : SubTask {
+        return SubTask(
+            id = id,
+            title = title,
+            isDone = isDone,
+            position = position,
+            ownerId = taskOwnerId
+        )
+    }
 }

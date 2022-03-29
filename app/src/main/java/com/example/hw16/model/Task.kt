@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import java.io.Serializable
+import java.util.*
 
 @Entity(tableName = Task.TABLE_NAME, foreignKeys = [
     ForeignKey(
@@ -16,11 +18,11 @@ data class Task(
     @ColumnInfo(name = "user_owner_id") val userName: String,
     @ColumnInfo(name = "task_title") val title: String,
     @ColumnInfo(name = "task_description") val description: String,
-    @ColumnInfo(name = "task_deadline") val deadline: Long,
+    @ColumnInfo(name = "task_deadline") val deadline: Date,
     @ColumnInfo(name = "task_image_uri") val image_uri: String = "",
     @ColumnInfo(name = "task_is_done") val isDone: Boolean = false,
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "task_id") val id: Long = 0
-) {
+) : Serializable {
     companion object {
         const val TABLE_NAME = "task_table"
     }

@@ -22,10 +22,10 @@ interface TaskDao : MyDao<Task, Long> {
     @Query("select * from task_table order by task_deadline asc")
     override fun getAll(): Flow<List<Task>>
 
-    @Query("select * from task_table where user_owner_id = :username order by task_deadline asc")
+    @Query("select * from task_table where user_owner_id = :username order by task_is_done, task_deadline asc")
     fun getUserTasks(username: String) : Flow<List<Task>>
 
-    @Query("select * from task_table where user_owner_id = :username order by task_deadline asc")
+    @Query("select * from task_table where user_owner_id = :username order by task_is_done, task_deadline asc")
     fun getUserTasksWithSubTasks(username: String) : Flow<List<TaskWithSubTask>>
 
     @Query("select * from task_table " +
@@ -48,7 +48,7 @@ interface TaskDao : MyDao<Task, Long> {
     ) : Flow<List<Task>>
 
     @Query("delete from task_table where task_id in (:ids)")
-    suspend fun deleteItem(vararg ids: Long)
+    suspend fun deleteItem(vararg ids: Long): Int
 
     @Query("select * from task_table")
     fun taskWithSubTasks(): Flow<List<TaskWithSubTask>>

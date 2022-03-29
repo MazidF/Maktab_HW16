@@ -1,6 +1,7 @@
 package com.example.hw16.data.local
 
 import com.example.hw16.data.local.db.MyDao
+import com.example.hw16.utils.logger
 import kotlinx.coroutines.flow.Flow
 
 abstract class LocalDataSource<Item, PrimaryKey>(private val dao: MyDao<Item, PrimaryKey>) {
@@ -14,7 +15,8 @@ abstract class LocalDataSource<Item, PrimaryKey>(private val dao: MyDao<Item, Pr
     }
 
     suspend fun update(vararg items: Item) {
-        dao.updateItem(*items)
+        val result = dao.updateItem(*items)
+        logger("result of update : $result")
     }
 
     suspend fun remove(vararg items: Item, removeAll: Boolean) {

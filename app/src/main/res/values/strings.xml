@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">HW16</string>
     <string name="time_data"><![CDATA[Time & Data]]></string>
+    <string name="sub_task_title">sub-task title</string>
+    <string name="add_sub_task">Add Sub-task</string>
+    <string name="task_description">Task Description</string>
+    <string name="task_title">Task Title</string>
+    <string name="due_date">Due Date</string>
 </resources>

@@ -7,10 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
 import com.example.hw16.data.MyRepository
 import com.example.hw16.data.local.FileType
-import com.example.hw16.model.Task
-import com.example.hw16.model.TaskItemUiState
-import com.example.hw16.model.TaskState
-import com.example.hw16.model.User
+import com.example.hw16.model.*
 import com.example.hw16.ui.ProgressResult
 import com.example.hw16.utils.Mapper.toTaskItemUiState
 import com.example.hw16.utils.logger
@@ -64,7 +61,7 @@ class TaskAndUserUseCase(
         if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, output)) {
             return null
         }
-        val fileName = System.currentTimeMillis().toString()
+        val fileName = System.currentTimeMillis().toString() + fileType.format
         return repository.save(
             context,
             fileType,
@@ -103,16 +100,15 @@ class TaskAndUserUseCase(
         }
         val liveData = repository.getUserTasks(user.username).asLiveData()
         val rootPath = rootFile.absolutePath + File.separator + fileType.value + File.separator
+        clearLists()
         observeForever(liveData) { list ->
             val resultList = list.mapIndexed { index, task ->
-                task.toTaskItemUiState(if (task.image_uri == "") "" else rootPath + task.image_uri)
+                task.toTaskItemUiState(/*if (task.image_uri == "") "" else rootPath + task.image_uri*/)
                     .also { taskItemUiState ->
                         separate(taskItemUiState, index)
                     }
             }
             taskList = ArrayList(resultList)
-            clearLists()
-//            taskList.addAll(resultList)
             _tasks.value = taskList
         }
     }
@@ -143,6 +139,18 @@ class TaskAndUserUseCase(
         updateList()
     }
 
+    suspend fun addSubTask(subTask: SubTask) {
+        repository.addSubTask(subTask)
+    }
+
+    suspend fun removeSubTask(subTask: SubTaskItemUiState) {
+        repository.removeSubTask(subTask.id)
+    }
+
+    suspend fun editSubTask(subTask: SubTask) {
+        repository.editSubTask(subTask)
+    }
+
     private fun separate(taskItemUiState: TaskItemUiState, index: Int) {
         when (taskItemUiState.state) {
             TaskState.DONE -> listDone.add(index)
@@ -152,6 +160,15 @@ class TaskAndUserUseCase(
     }
 
     fun getTaskOfDay(from: Long, to: Long): LiveData<List<Task>> {
+        // TODO: Implement
         return MutableLiveData()
+    }
+
+    fun getTaskWithSubTasks(taskId: Long): LiveData<TaskWithSubTask?> {
+        return repository.getTaskWithSubTasks(taskId)
+    }
+
+    fun getSubTasksOfTask(taskId: Long): LiveData<List<SubTask>> {
+        return repository.getSubTasksOfTask(taskId).asLiveData()
     }
 }

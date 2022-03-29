@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="com.example.hw16.model.SubTaskItemUiState" />
+
+        <variable
+            name="subTask"
+            type="SubTaskItemUiState" />
+
+        <variable
+            name="focus"
+            type="Boolean" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+
+        <RadioButton
+            android:id="@+id/sub_task_radio_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked='@{subTask.isDone}'
+            app:radioColorDisable='@{"#FF000000"}'
+            app:radioColorEnable='@{"#FFD5D5D5"}' />
+
+        <EditText
+            app:drawLine='@{subTask.done}'
+            android:id="@+id/sub_task_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:hint="@string/sub_task_title"
+            android:textColor="@color/black"
+            android:textSize="16dp" />
+
+        <ImageView
+            android:id="@+id/sub_task_end_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="10dp"
+            android:src='@{focus == true ? @drawable/ic_close : @drawable/ic_drag, default=@drawable/ic_close}' />
+
+    </LinearLayout>
+</layout>

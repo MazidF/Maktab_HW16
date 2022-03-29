@@ -1,14 +1,18 @@
 package com.example.hw16.model
 
+import java.util.*
+
 data class TaskItemUiState(
     val title: String,
     val description: String,
-    val deadline: Long,
+    val deadline: Date,
     val image_uri: String,
     val id: Long,
     val state: TaskState
 ) {
-    fun getTime() = com.example.hw16.utils.getTime(deadline)
+    fun isDone() = state == TaskState.DONE
+
+    fun getTime() = com.example.hw16.utils.getTimeAsString(deadline)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -19,9 +19,11 @@ import com.example.hw16.databinding.TaskMakerBinding
 import com.example.hw16.di.MyViewModelFactory
 import com.example.hw16.model.Task
 import com.example.hw16.ui.home.FragmentHomeDirections
+import com.example.hw16.utils.createPicker
 import com.example.hw16.utils.format
 import com.example.hw16.utils.logger
-import com.example.hw16.utils.toSecond
+import com.example.hw16.utils.toDate
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -143,7 +145,7 @@ class MainActivity : AppCompatActivity() {
             }.create()
     }
 
-    private fun createCameraLauncher(binding: TaskMakerBinding) {
+    private fun createLauncher(binding: TaskMakerBinding) {
         cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) {
             if (it != null) {
                 binding.uri = model.saveImageToFile(this, FileType.IMAGE_FILE, it) ?: ""
@@ -161,10 +163,10 @@ class MainActivity : AppCompatActivity() {
         val binding = TaskMakerBinding.inflate(layoutInflater).apply {
             uri = ""
             taskMakerCalendar.setOnClickListener {
-                model.createPicker(this@MainActivity) { year, month, day, hour, minute ->
+                createPicker(this@MainActivity) { year, month, day, hour, minute ->
                     taskMakerDate.text =
                         "$year/${month.format()}/${day.format()}  &  ${hour.format()}:${minute.format()}"
-                    taskMakerDate.tag = toSecond(year, month, day, hour, minute)
+                    taskMakerDate.tag = toDate(year, month, day, hour, minute)
                 }
             }
             taskMakerCreateBtn.setOnClickListener {
@@ -186,7 +188,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        createCameraLauncher(binding)
+        createLauncher(binding)
 
         dialog = AlertDialog.Builder(this)
             .setView(binding.root)
@@ -222,10 +224,8 @@ class MainActivity : AppCompatActivity() {
                     userName = model.user.value!!.username,
                     title = taskMakerTitle.text.toString(),
                     description = taskMakerDescription.text.toString(),
-                    deadline = taskMakerDate.tag as Long, // TODO: Time should be right :(
-                    image_uri = uri?.run {
-                        substring(lastIndexOf("/") + 1)
-                    } ?: ""
+                    deadline = taskMakerDate.tag as Date,
+                    image_uri = uri ?: ""
                 )
             }
         }

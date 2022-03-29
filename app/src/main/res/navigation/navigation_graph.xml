@@ -12,6 +12,13 @@
         <action
             android:id="@+id/action_fragmentHome_to_fragmentLogin"
             app:destination="@id/fragmentLogin" />
+        <action
+            android:id="@+id/action_fragmentHome_to_fragmentTask"
+            app:destination="@id/fragmentTask"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/fragmentLogin"
@@ -38,5 +45,23 @@
         android:id="@+id/fragmentCalendar"
         android:name="com.example.hw16.ui.calendar.FragmentCalendar"
         android:label="FragmentCalendar"
-        tools:layout="@layout/fragment_calendar"/>
+        tools:layout="@layout/fragment_calendar">
+        <action
+            android:id="@+id/action_fragmentCalendar_to_fragmentTask"
+            app:destination="@id/fragmentTask" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentTask"
+        android:name="com.example.hw16.ui.task.FragmentTask"
+        android:label="FragmentTask"
+        tools:layout="@layout/fragment_task">
+        <argument
+            android:name="task_id"
+            app:argType="long" />
+    </fragment>
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="com.example.hw16.ui.MainActivity"
+        android:label="MainActivity"
+        tools:layout="@layout/activity_main"/>
 </navigation>

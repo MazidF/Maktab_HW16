@@ -1,8 +1,9 @@
 package com.example.hw16.data.local
 
-import com.example.hw16.data.local.db.MyDao
 import com.example.hw16.data.local.db.TaskDao
 import com.example.hw16.model.Task
+import com.example.hw16.model.TaskWithSubTask
+import com.example.hw16.utils.logger
 import kotlinx.coroutines.flow.Flow
 
 class TaskDataSource(
@@ -30,6 +31,11 @@ class TaskDataSource(
     }
 
     suspend fun removeWithId(vararg ids: Long) {
-        taskDao.deleteItem(*ids)
+        val result = taskDao.deleteItem(*ids)
+        logger("result of delete: $result")
+    }
+
+    fun getTaskWithSubTasks(primaryKey: Long): Flow<TaskWithSubTask?> {
+        return taskDao.findTaskWithSubTasks(primaryKey)
     }
 }

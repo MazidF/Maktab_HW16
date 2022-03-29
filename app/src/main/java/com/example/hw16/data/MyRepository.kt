@@ -5,11 +5,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.map
-import com.example.hw16.data.local.FileLocalDataSource
-import com.example.hw16.data.local.FileType
-import com.example.hw16.data.local.TaskDataSource
-import com.example.hw16.data.local.UserDataSource
+import com.example.hw16.data.local.*
+import com.example.hw16.model.SubTask
 import com.example.hw16.model.Task
+import com.example.hw16.model.TaskWithSubTask
 import com.example.hw16.model.User
 import kotlinx.coroutines.flow.Flow
 import java.io.File
@@ -18,6 +17,7 @@ import java.io.Serializable
 class MyRepository(
     private val userDataSource: UserDataSource,
     private val taskDataSource: TaskDataSource,
+    private val subTaskDataSource: SubTaskDataSource,
     private val fileDataSource: FileLocalDataSource
 ) {
 
@@ -27,6 +27,22 @@ class MyRepository(
 
     suspend fun addTask(task: Task): Long {
         return taskDataSource.insert(task)[0]
+    }
+
+    suspend fun editTask(task: Task) {
+        taskDataSource.update(task)
+    }
+
+    suspend fun removeSubTask(vararg ids: Long) {
+        subTaskDataSource.removeWithId(*ids)
+    }
+
+    suspend fun addSubTask(subTask: SubTask): Long {
+        return subTaskDataSource.insert(subTask)[0]
+    }
+
+    suspend fun editSubTask(subTask: SubTask) {
+        subTaskDataSource.update(subTask)
     }
 
     fun searchTasks(
@@ -47,8 +63,8 @@ class MyRepository(
         return taskDataSource.getUserTasks(username)
     }
 
-    suspend fun editTask(task: Task) {
-        taskDataSource.update(task)
+    fun getTaskWithSubTasks(taskId: Long): LiveData<TaskWithSubTask?> {
+        return taskDataSource.getTaskWithSubTasks(taskId).asLiveData()
     }
 
     suspend fun signInUser(user: User): LiveData<User?> {
@@ -112,5 +128,9 @@ class MyRepository(
 
     fun removeFile(uri: String) {
         fileDataSource.deleteFile(uri)
+    }
+
+    fun getSubTasksOfTask(taskId: Long): Flow<List<SubTask>> {
+        return subTaskDataSource.getSubTasksOfTask(taskId)
     }
 }

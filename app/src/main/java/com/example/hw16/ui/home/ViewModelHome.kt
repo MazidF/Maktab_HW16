@@ -2,7 +2,6 @@ package com.example.hw16.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.recyclerview.widget.RecyclerView
 import com.example.hw16.domain.TaskAndUserUseCase
 import com.example.hw16.model.Task
 import com.example.hw16.model.TaskItemUiState
@@ -16,12 +15,14 @@ class ViewModelHome(
     val listDone = useCase.listDone
     val listDoing = useCase.listDoing
     val listTodo = useCase.listTodo
-    val viewPool = RecyclerView.RecycledViewPool()
+//    val viewPool = RecyclerView.RecycledViewPool()
 
     init {
         with(useCase) {
             user.observeForever {
-                getTasks()
+                if (it != null) {
+                    getTasks()
+                }
             }
         }
     }

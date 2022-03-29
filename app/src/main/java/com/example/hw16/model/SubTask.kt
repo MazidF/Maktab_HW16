@@ -3,6 +3,7 @@ package com.example.hw16.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.ForeignKey.CASCADE
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -11,7 +12,8 @@ import androidx.room.PrimaryKey
         ForeignKey(
             entity = Task::class,
             parentColumns = ["task_id"],
-            childColumns = ["sub_task_owner_task_id"]
+            childColumns = ["sub_task_owner_task_id"],
+            onDelete = CASCADE
         )
     ]
 )

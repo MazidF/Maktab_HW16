@@ -73,7 +73,7 @@ class FileLocalDataSource {
                 it.flush()
             }
             if (waitUntilFileIsReady) {
-                while (destinationFile.canRead().not()) { }
+                while (destinationFile.canRead().not()) {}
             }
         } catch (e: Exception) {
             return null

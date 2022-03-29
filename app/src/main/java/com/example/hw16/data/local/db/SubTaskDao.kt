@@ -11,7 +11,7 @@ interface SubTaskDao : MyDao<SubTask, Long> {
     @Query("delete from sub_task_table")
     override suspend fun deleteAll()
 
-    @Query("select * from sub_task_table")
+    @Query("select * from sub_task_table order by sub_task_position desc")
     override fun getAll(): Flow<List<SubTask>>
 
     @Query("select * from sub_task_table where sub_task_id = :primaryKey")

@@ -3,6 +3,7 @@ package com.example.hw16.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.ForeignKey.CASCADE
 import androidx.room.PrimaryKey
 import java.io.Serializable
 import java.util.*
@@ -11,7 +12,8 @@ import java.util.*
     ForeignKey(
         entity = User::class,
         parentColumns = ["user_name"],
-        childColumns = ["user_owner_id"]
+        childColumns = ["user_owner_id"],
+        onDelete = CASCADE
     )
 ])
 data class Task(

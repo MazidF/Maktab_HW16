@@ -9,6 +9,7 @@ class MyFragmentPagerManager(
     private val fragments: List<Class<out Fragment>>,
     private val args: List<Bundle>,
 ) : FragmentStateAdapter(fragment) {
+    
     private val manager = fragment.childFragmentManager
 
     override fun getItemCount() = fragments.size

@@ -14,8 +14,7 @@ import com.example.hw16.databinding.TaskItemBinding as ItemTaskBinding
 class TaskListAdapter(
     private val onTaskEdit: (TaskItemUiState, Boolean) -> Unit,
     private val onClick: (TaskItemUiState) -> Unit = {}
-) :
-    ListAdapter<TaskItemUiState, TaskHolder>(DIFF_CALLBACK) {
+) : ListAdapter<TaskItemUiState, TaskHolder>(DIFF_CALLBACK) {
 
     inner class TaskHolder(
         private val binding: ItemTaskBinding,
@@ -79,15 +78,7 @@ class TaskListAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskHolder {
         val inflater = LayoutInflater.from(parent.context)
         return TaskHolder(
-            ItemTaskBinding.inflate(inflater, parent, false)/*.apply {
-                 taskItemRadioButton.setup { isChecked ->
-                     task?.let {
-                         if (it.isDone() != isChecked) {
-                             onTaskEdit(it, isChecked)
-                         }
-                     }
-                 }
-            }*/,
+            ItemTaskBinding.inflate(inflater, parent, false),
             onClick
         )
     }
@@ -111,4 +102,6 @@ class TaskListAdapter(
         }
         logger("customSubmit")
     }
+
+
 }
